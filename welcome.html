@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0a0a0f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Welcome — Pink App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pink-50: #fff0f3;
+            --pink-100: #ffd6e0;
+            --pink-400: #ff6b8a;
+            --pink-500: #fe2c55;
+            --pink-600: #e01a3f;
+            --pink-glow: rgba(254, 44, 85, 0.35);
+            --cyan: #25f4ee;
+            --gold: #ffd700;
+            --bg-base: #07070a;
+            --bg-elevated: #0f0f14;
+            --glass-border: rgba(255, 255, 255, 0.06);
+            --text-primary: #f5f5f7;
+            --text-secondary: rgba(255, 255, 255, 0.55);
+            --text-tertiary: rgba(255, 255, 255, 0.35);
+            --text-muted: rgba(255, 255, 255, 0.25);
+            --spring: cubic-bezier(0.23, 1, 0.32, 1);
+            --smooth: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Inter', sans-serif; }
+        html { scroll-behavior: smooth; }
+        body {
+            background: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Ambient Background */
+        .ambient-bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.3;
+            animation: orbFloat 20s ease-in-out infinite;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--pink-500); top: -150px; right: -120px; animation-delay: 0s; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 10%; left: -80px; opacity: 0.12; animation-delay: -7s; }
+        .orb-3 { width: 250px; height: 250px; background: var(--gold); top: 40%; left: 50%; opacity: 0.06; animation-delay: -14s; }
+        @keyframes orbFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -20px) scale(1.05); }
+            66% { transform: translate(-20px, 15px) scale(0.95); }
+        }
+        .grain {
+            position: fixed; inset: 0; z-index: 1; opacity: 0.025; pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+
+        /* App Container */
+        .app-container {
+            position: relative; z-index: 2;
+            max-width: 480px; margin: 0 auto;
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 2rem 1.5rem;
+            text-align: center;
+        }
+
+        /* Logo */
+        .logo-wrap {
+            margin-bottom: 2.5rem;
+            animation: logoReveal 1.2s var(--spring) both;
+        }
+        @keyframes logoReveal {
+            0% { opacity: 0; transform: scale(0.6) translateY(30px); }
+            60% { transform: scale(1.05) translateY(-5px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .logo-ring {
+            width: 100px; height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--pink-500), var(--pink-400));
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1.25rem;
+            box-shadow: 0 8px 40px rgba(254, 44, 85, 0.35), 0 0 80px rgba(254, 44, 85, 0.15);
+            position: relative;
+            animation: logoPulse 3s ease-in-out infinite;
+        }
+        @keyframes logoPulse {
+            0%, 100% { box-shadow: 0 8px 40px rgba(254, 44, 85, 0.35), 0 0 80px rgba(254, 44, 85, 0.15); }
+            50% { box-shadow: 0 12px 50px rgba(254, 44, 85, 0.45), 0 0 100px rgba(254, 44, 85, 0.25); }
+        }
+        .logo-ring svg { width: 48px; height: 48px; color: white; }
+        .logo-text {
+            font-size: 2rem; font-weight: 800;
+            background: linear-gradient(135deg, #fff 20%, var(--pink-100) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+        .logo-tagline {
+            font-size: 0.8rem; color: var(--text-secondary);
+            margin-top: 0.5rem; font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        /* Welcome Content */
+        .welcome-title {
+            font-size: 1.75rem; font-weight: 700;
+            line-height: 1.2; margin-bottom: 1rem;
+            animation: fadeUp 0.8s 0.4s var(--spring) both;
+            letter-spacing: -0.01em;
+        }
+        .welcome-title span {
+            background: linear-gradient(135deg, var(--pink-400), var(--cyan));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .welcome-desc {
+            font-size: 0.95rem; color: var(--text-secondary);
+            line-height: 1.6; max-width: 320px;
+            margin: 0 auto 2.5rem;
+            animation: fadeUp 0.8s 0.55s var(--spring) both;
+        }
+
+        /* Feature Cards */
+        .features {
+            display: flex; flex-direction: column;
+            gap: 0.75rem; width: 100%; max-width: 340px;
+            margin-bottom: 2.5rem;
+        }
+        .feature-card {
+            background: rgba(255, 255, 255, 0.025);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1rem 1.125rem;
+            display: flex; align-items: center; gap: 0.875rem;
+            text-align: left;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 0.6s var(--spring) forwards;
+        }
+        .feature-card:nth-child(1) { animation-delay: 0.7s; }
+        .feature-card:nth-child(2) { animation-delay: 0.85s; }
+        .feature-card:nth-child(3) { animation-delay: 1.0s; }
+        .feature-card:nth-child(4) { animation-delay: 1.15s; }
+        .feature-icon {
+            width: 40px; height: 40px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .feature-icon svg { width: 20px; height: 20px; stroke-width: 2; }
+        .feature-icon.pink { background: linear-gradient(135deg, rgba(254,44,85,0.15), rgba(254,44,85,0.05)); color: var(--pink-400); }
+        .feature-icon.cyan { background: linear-gradient(135deg, rgba(37,244,238,0.15), rgba(37,244,238,0.05)); color: var(--cyan); }
+        .feature-icon.gold { background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05)); color: var(--gold); }
+        .feature-icon.green { background: linear-gradient(135deg, rgba(52,211,153,0.15), rgba(52,211,153,0.05)); color: #34d399; }
+        .feature-text { flex: 1; }
+        .feature-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 2px; }
+        .feature-desc { font-size: 0.75rem; color: var(--text-tertiary); line-height: 1.4; }
+
+        /* CTA Button */
+        .cta-wrap {
+            width: 100%; max-width: 340px;
+            animation: fadeUp 0.8s 1.3s var(--spring) both;
+        }
+        .cta-btn {
+            width: 100%; padding: 1rem;
+            background: linear-gradient(135deg, var(--pink-500), var(--pink-600));
+            color: white; border: none; border-radius: 16px;
+            font-size: 0.95rem; font-weight: 700;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+            box-shadow: 0 4px 24px rgba(254, 44, 85, 0.35), inset 0 1px 0 rgba(255,255,255,0.15);
+            transition: all 0.3s var(--spring);
+            position: relative; overflow: hidden;
+        }
+        .cta-btn::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.1) 50%, transparent 60%);
+            background-size: 200% 100%;
+            animation: shimmer 2.5s infinite;
+        }
+        .cta-btn:active { transform: scale(0.97); box-shadow: 0 2px 12px rgba(254, 44, 85, 0.25); }
+        .cta-btn svg { width: 18px; height: 18px; stroke-width: 2.5; }
+        .cta-hint {
+            font-size: 0.7rem; color: var(--text-muted);
+            margin-top: 0.875rem; letter-spacing: 0.3px;
+        }
+
+        /* Animations */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Reduced Motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+    <div class="grain"></div>
+
+    <div class="app-container">
+        <!-- Logo -->
+        <div class="logo-wrap">
+            <div class="logo-ring">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                </svg>
+            </div>
+            <div class="logo-text">Pink App</div>
+            <div class="logo-tagline">Earn. Watch. Withdraw.</div>
+        </div>
+
+        <!-- Welcome Text -->
+        <div class="welcome-title">Welcome to <span>Pink App</span></div>
+        <div class="welcome-desc">
+            The #1 platform for Africans to earn real cash by watching videos, completing daily tasks, and inviting friends.
+        </div>
+
+        <!-- Features -->
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon pink">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                </div>
+                <div class="feature-text">
+                    <div class="feature-title">Watch & Earn</div>
+                    <div class="feature-desc">Watch short videos and earn coins instantly</div>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon cyan">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                </div>
+                <div class="feature-text">
+                    <div class="feature-title">Instant Withdrawal</div>
+                    <div class="feature-desc">Cash out to your local bank in seconds</div>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon gold">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </div>
+                <div class="feature-text">
+                    <div class="feature-title">Daily Rewards</div>
+                    <div class="feature-desc">Claim bonuses every day and build streaks</div>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon green">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <div class="feature-text">
+                    <div class="feature-title">Refer & Earn</div>
+                    <div class="feature-desc">Get 200 coins for every friend you invite</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="cta-wrap">
+            <button class="cta-btn" onclick="goToDashboard()">
+                Get Started
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+            <div class="cta-hint">Free to join · Available in 40+ African countries</div>
+        </div>
+    </div>
+
+    <script>
+        // Check if welcome already seen
+        function hasSeenWelcome() {
+            return localStorage.getItem('pinkApp_welcomeSeen') === 'true';
+        }
+
+        function markWelcomeSeen() {
+            localStorage.setItem('pinkApp_welcomeSeen', 'true');
+        }
+
+        // If already seen, redirect immediately to dashboard
+        if (hasSeenWelcome()) {
+            window.location.replace('dashboard.html');
+        }
+
+        function goToDashboard() {
+            markWelcomeSeen();
+            document.querySelector('.app-container').style.opacity = '0';
+            document.querySelector('.app-container').style.transform = 'scale(0.95)';
+            document.querySelector('.app-container').style.transition = 'all 0.4s var(--spring)';
+            setTimeout(function() {
+                window.location.href = 'pink-dashboard.html';
+            }, 400);
+        }
+
+        // Auto-redirect after 15 seconds if user does nothing
+        setTimeout(function() {
+            if (!hasSeenWelcome()) {
+                goToDashboard();
+            }
+        }, 15000);
+    </script>
+</body>
+</html>

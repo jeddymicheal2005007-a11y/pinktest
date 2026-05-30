@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0a0a0f">
+    <title>Pink App — Secure Verification</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <style>
+        :root {
+            --pink-primary: #fe2c55;
+            --pink-secondary: #ff6b8a;
+            --cyan: #25f4ee;
+            --gold: #ffd700;
+            --bg-dark: #0a0a0f;
+            --glass-bg: rgba(255, 255, 255, 0.06);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.5);
+            --success: #00d26a;
+            --error: #ff4757;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Outfit', sans-serif; }
+        body {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .ambient-bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.35; }
+        .orb-1 { width: 280px; height: 280px; background: var(--pink-primary); top: -100px; right: -100px; }
+        .orb-2 { width: 220px; height: 220px; background: var(--cyan); bottom: 15%; left: -80px; opacity: 0.18; }
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            max-width: 380px;
+            width: 100%;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+            animation: slide-up 0.6s ease-out;
+        }
+        @keyframes slide-up { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--pink-primary), var(--pink-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        .subtitle { color: var(--text-secondary); font-size: 13px; margin-bottom: 2rem; }
+        .spinner-wrap { display: flex; justify-content: center; margin-bottom: 1.5rem; }
+        .spinner {
+            width: 48px;
+            height: 48px;
+            position: relative;
+        }
+        .spinner::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: var(--pink-primary);
+            border-right-color: var(--pink-secondary);
+            animation: spin 1s linear infinite;
+        }
+        .spinner::after {
+            content: '';
+            position: absolute;
+            inset: 8px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-bottom-color: var(--cyan);
+            border-left-color: var(--gold);
+            animation: spin 1.5s linear infinite reverse;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .status { font-size: 16px; font-weight: 500; margin-bottom: 0.5rem; line-height: 1.4; }
+        .success { color: var(--cyan); }
+        .error { color: var(--error); }
+        .detail { color: var(--text-secondary); font-size: 13px; margin-bottom: 1.5rem; }
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            background: linear-gradient(135deg, var(--pink-primary), var(--pink-secondary));
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(254, 44, 85, 0.25);
+            transition: all 0.3s;
+        }
+        .btn:active { transform: scale(0.98); }
+        .hidden { display: none !important; }
+        .reset-form { text-align: left; }
+        .input-group { margin-bottom: 1.25rem; }
+        .input-label { display: block; font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); margin-bottom: 0.5rem; }
+        .input-field {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+        .input-field::placeholder { color: rgba(255, 255, 255, 0.25); }
+        .input-field:focus { border-color: var(--pink-primary); background: rgba(254, 44, 85, 0.05); box-shadow: 0 0 0 3px rgba(254, 44, 85, 0.1); }
+        .strength-bar { height: 4px; background: rgba(255, 255, 255, 0.08); border-radius: 2px; margin-top: 0.5rem; overflow: hidden; }
+        .strength-fill { height: 100%; width: 0%; border-radius: 2px; transition: all 0.3s; }
+        .strength-weak { background: var(--error); width: 33%; }
+        .strength-medium { background: var(--gold); width: 66%; }
+        .strength-strong { background: var(--success); width: 100%; }
+        .strength-text { font-size: 0.75rem; color: rgba(255, 255, 255, 0.3); margin-top: 0.35rem; text-align: right; }
+        .success-state { text-align: center; }
+        .success-icon { width: 72px; height: 72px; margin: 0 auto 1.5rem; background: rgba(0, 210, 106, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .success-icon svg { width: 36px; height: 36px; color: var(--success); }
+        .success-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .success-text { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem; }
+        .btn-outline {
+            display: inline-block;
+            padding: 0.875rem 2rem;
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        .btn-outline:hover { border-color: rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.03); }
+        .error-box { background: rgba(255, 71, 87, 0.08); border: 1px solid rgba(255, 71, 87, 0.2); border-radius: 12px; padding: 1rem; margin-bottom: 1.25rem; color: var(--error); font-size: 0.85rem; display: none; }
+    </style>
+</head>
+<body>
+    <div class="ambient-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <div class="card">
+        <div class="logo">Pink App</div>
+        <div class="subtitle" id="subtitle">Secure Account Verification</div>
+
+        <div id="verifyState">
+            <div class="spinner-wrap"><div class="spinner"></div></div>
+            <div class="status" id="verifyStatus">Verifying your email...</div>
+            <div class="detail" id="verifyDetail">Please wait while we confirm your identity</div>
+        </div>
+
+        <div id="resetState" class="hidden">
+            <div class="error-box" id="errorBox"></div>
+            <div class="reset-form">
+                <div class="input-group">
+                    <label class="input-label">New Password</label>
+                    <input type="password" class="input-field" id="newPass" placeholder="Minimum 6 characters" oninput="checkStrength()">
+                    <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+                    <div class="strength-text" id="strengthText"></div>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Confirm Password</label>
+                    <input type="password" class="input-field" id="confirmPass" placeholder="Re-enter password">
+                </div>
+                <button class="btn" id="resetBtn" onclick="handleReset()" style="width:100%;">Reset Password</button>
+            </div>
+        </div>
+
+        <div id="successState" class="hidden success-state">
+            <div class="success-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                </svg>
+            </div>
+            <div class="success-title" id="successTitle">Success!</div>
+            <div class="success-text" id="successText">Your request has been completed.</div>
+            <a href="#" id="successLink" class="btn-outline">Continue</a>
+        </div>
+
+        <div id="errorState" class="hidden">
+            <div class="status error" id="errorTitle">Something went wrong</div>
+            <div class="detail" id="errorDetail">This link is invalid or has expired.</div>
+            <a href="#" id="errorLink" class="btn" style="margin-top:1rem;">Go to Login</a>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBUEKYA5x1T2Qb3T8Z6rP5qv5jmfTXlRU0",
+            authDomain: "pink-app-5ecd1.firebaseapp.com",
+            projectId: "pink-app-5ecd1",
+            storageBucket: "pink-app-5ecd1.firebasestorage.app",
+            messagingSenderId: "659145722582",
+            appId: "1:659145722582:web:1e0778ce8aa62dff129777"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // ===== AUTO-DETECT HOST =====
+        const CURRENT_HOST = window.location.origin;
+        const DEFAULT_VERIFIED = CURRENT_HOST + '/pink-verified.html';
+        const DEFAULT_LOGIN = CURRENT_HOST + '/pink-login.html';
+
+        let authConfig = {
+            verifyRedirectUrl: DEFAULT_VERIFIED,   // Email verify -> pink-verified.html
+            resetRedirectUrl: DEFAULT_LOGIN        // Password reset -> pink-login.html
+        };
+
+        async function loadAuthConfig() {
+            try {
+                const doc = await db.collection('config').doc('appSettings').get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data.verifyRedirectUrl) authConfig.verifyRedirectUrl = data.verifyRedirectUrl;
+                    if (data.resetRedirectUrl) authConfig.resetRedirectUrl = data.resetRedirectUrl;
+                }
+            } catch (e) {
+                console.log('Using default redirects from host:', CURRENT_HOST);
+            }
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const mode = urlParams.get('mode');
+        const oobCode = urlParams.get('oobCode');
+        let continueUrl = urlParams.get('continueUrl');
+
+        const subtitle = document.getElementById('subtitle');
+        const verifyState = document.getElementById('verifyState');
+        const verifyStatus = document.getElementById('verifyStatus');
+        const verifyDetail = document.getElementById('verifyDetail');
+        const resetState = document.getElementById('resetState');
+        const successState = document.getElementById('successState');
+        const successTitle = document.getElementById('successTitle');
+        const successText = document.getElementById('successText');
+        const successLink = document.getElementById('successLink');
+        const errorState = document.getElementById('errorState');
+        const errorTitle = document.getElementById('errorTitle');
+        const errorDetail = document.getElementById('errorDetail');
+        const errorLink = document.getElementById('errorLink');
+        const errorBox = document.getElementById('errorBox');
+
+        function showSuccess(title, msg, redirectTo) {
+            const target = redirectTo || authConfig.verifyRedirectUrl;
+            verifyState.classList.add('hidden');
+            resetState.classList.add('hidden');
+            successState.classList.remove('hidden');
+            successTitle.textContent = title;
+            successText.textContent = msg;
+            successLink.href = target;
+            successLink.textContent = 'Continue';
+            // Auto-redirect after 2.5 seconds
+            setTimeout(() => window.location.href = target, 2500);
+        }
+
+        function showError(title, msg) {
+            verifyState.classList.add('hidden');
+            resetState.classList.add('hidden');
+            errorState.classList.remove('hidden');
+            errorTitle.textContent = title;
+            errorDetail.textContent = msg;
+            errorLink.href = authConfig.verifyRedirectUrl;
+        }
+
+        async function handleVerifyEmail() {
+            subtitle.textContent = 'Verifying your email address';
+            try {
+                await firebase.auth().applyActionCode(oobCode);
+                showSuccess('Email Verified!', 'Your Pink App account is now active. Redirecting...', authConfig.verifyRedirectUrl);
+            } catch(err) {
+                showError('Link Expired', 'This verification link is invalid or has already been used.');
+            }
+        }
+
+        function initPasswordReset() {
+            subtitle.textContent = 'Create a new password';
+            verifyState.classList.add('hidden');
+            resetState.classList.remove('hidden');
+        }
+
+        window.checkStrength = function() {
+            const val = document.getElementById('newPass').value;
+            const fill = document.getElementById('strengthFill');
+            const text = document.getElementById('strengthText');
+            if (!val) { fill.className = 'strength-fill'; text.textContent = ''; return; }
+            let score = 0;
+            if (val.length >= 6) score++;
+            if (val.length >= 10) score++;
+            if (/[A-Z]/.test(val)) score++;
+            if (/[0-9]/.test(val)) score++;
+            if (/[^A-Za-z0-9]/.test(val)) score++;
+
+            fill.className = 'strength-fill';
+            if (score <= 2) { fill.classList.add('strength-weak'); text.textContent = 'Weak'; text.style.color = 'var(--error)'; }
+            else if (score <= 3) { fill.classList.add('strength-medium'); text.textContent = 'Medium'; text.style.color = 'var(--gold)'; }
+            else { fill.classList.add('strength-strong'); text.textContent = 'Strong'; text.style.color = 'var(--success)'; }
+        };
+
+        window.handleReset = async function() {
+            const password = document.getElementById('newPass').value;
+            const confirm = document.getElementById('confirmPass').value;
+            errorBox.style.display = 'none';
+            if (!password || password.length < 6) {
+                errorBox.textContent = 'Password must be at least 6 characters.';
+                errorBox.style.display = 'block';
+                return;
+            }
+            if (password !== confirm) {
+                errorBox.textContent = 'Passwords do not match.';
+                errorBox.style.display = 'block';
+                return;
+            }
+            const btn = document.getElementById('resetBtn');
+            btn.disabled = true;
+            btn.textContent = 'Updating...';
+            try {
+                await firebase.auth().confirmPasswordReset(oobCode, password);
+                showSuccess('Password Updated!', 'Your password has been reset successfully.', authConfig.resetRedirectUrl);
+            } catch(err) {
+                errorBox.textContent = err.message || 'Failed to reset password. Link may be expired.';
+                errorBox.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Reset Password';
+            }
+        };
+
+        async function start() {
+            await loadAuthConfig();
+            if (!continueUrl) continueUrl = authConfig.verifyRedirectUrl;
+            if (mode === 'verifyEmail' && oobCode) {
+                await handleVerifyEmail();
+            } else if (mode === 'resetPassword' && oobCode) {
+                initPasswordReset();
+            } else {
+                showError('Invalid Link', 'This URL is missing required verification parameters.');
+            }
+        }
+        start();
+    </script>
+</body>
+</html>
