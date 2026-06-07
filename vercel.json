@@ -1,0 +1,11 @@
+{
+  "rewrites": [
+    { "source": "/join", "destination": "/pink-signup.html" },
+    { "source": "/login", "destination": "/pink-login.html" },
+    { "source": "/dashboard", "destination": "/pink-dashboard.html" },
+    { "source": "/refer", "destination": "/pink-referral.html" },
+    { "source": "/earn", "destination": "/pink-earn.html" },
+    { "source": "/watch", "destination": "/pink-watch.html" },
+    { "source": "/verify", "destination": "/pink-verify.html" }
+  ]
+}
