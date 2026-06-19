@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pink App - Watch & Earn</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        :root {
+            --primary: #fe2c55; --primary-dark: #e02648; --secondary: #25f4ee; --accent: #ffd700;
+            --dark: #0a0a0f; --darker: #050508; --card: #12121a; --light: #ffffff;
+            --gray: #8a8b91; --gray-light: #b0b1b5; --success: #00d084; --success-dark: #00a859;
+            --gradient-primary: linear-gradient(135deg, #fe2c55 0%, #ff6b6b 100%);
+            --gradient-secondary: linear-gradient(135deg, #25f4ee 0%, #00d084 100%);
+            --gradient-gold: linear-gradient(135deg, #ffd700 0%, #ffaa00 100%);
+            --shadow-glow: 0 0 30px rgba(254, 44, 85, 0.3); --shadow-card: 0 10px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--darker); color: var(--light); overflow: hidden; touch-action: pan-y;
+        }
+
+        .app-container { height: 100vh; width: 100vw; position: relative; overflow: hidden; }
+
+        .loading-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--darker);
+            z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 20px; transition: opacity 0.5s;
+        }
+        .loading-screen.hidden { opacity: 0; pointer-events: none; }
+        .loading-logo {
+            width: 100px; height: 100px; background: var(--gradient-primary); border-radius: 28px;
+            display: flex; align-items: center; justify-content: center; font-size: 48px;
+            animation: bounce 1s infinite;
+        }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .loading-bar { width: 200px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        .loading-progress { height: 100%; background: var(--gradient-primary); width: 0%; transition: width 0.3s; }
+
+        .shuffle-indicator {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+            background: rgba(18, 18, 26, 0.95); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;
+            padding: 30px 40px; z-index: 5000; text-align: center;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .shuffle-indicator.show { transform: translate(-50%, -50%) scale(1); }
+        .shuffle-icon {
+            width: 70px; height: 70px; background: var(--gradient-secondary);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px; font-size: 32px; animation: shuffle-spin 1s ease-in-out infinite;
+        }
+        @keyframes shuffle-spin {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(-20deg); }
+            75% { transform: rotate(20deg); }
+            100% { transform: rotate(0deg); }
+        }
+        .shuffle-text { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+        .shuffle-subtext { font-size: 13px; color: var(--gray); }
+
+        .redirect-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: var(--card);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 28px;
+            padding: 35px;
+            text-align: center;
+            z-index: 2000;
+            width: 90%;
+            max-width: 380px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255,255,255,0.05);
+        }
+        .redirect-modal.show {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+            visibility: visible;
+        }
+        .redirect-icon {
+            width: 100px;
+            height: 100px;
+            background: var(--gradient-gold);
+            border-radius: 50%;
+            margin: 0 auto 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 45px;
+            color: var(--darker);
+            animation: pulse-gold 2s infinite;
+        }
+        @keyframes pulse-gold {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 0 20px 5px rgba(255, 215, 0, 0.3); }
+        }
+        .redirect-title {
+            font-size: 24px;
+            font-weight: 800;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .redirect-text {
+            font-size: 14px;
+            color: var(--gray);
+            margin-bottom: 28px;
+            line-height: 1.6;
+        }
+        .redirect-features {
+            background: rgba(255,255,255,0.03);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+        .redirect-feature {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            color: var(--gray-light);
+        }
+        .redirect-feature:last-child {
+            margin-bottom: 0;
+        }
+        .redirect-feature i {
+            color: var(--success);
+            font-size: 14px;
+        }
+        .btn-gold {
+            background: var(--gradient-gold);
+            color: var(--darker);
+            border: none;
+            padding: 16px 36px;
+            border-radius: 28px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 12px;
+            transition: transform 0.2s;
+        }
+        .btn-gold:hover {
+            transform: scale(1.02);
+        }
+
+        .header { position: fixed; top: 0; left: 0; right: 0; height: 60px; display: flex; align-items: center; justify-content: center; z-index: 100; background: linear-gradient(to bottom, rgba(5,5,8,0.95) 0%, transparent 100%); backdrop-filter: blur(20px); }
+        .header-back { position: absolute; left: 16px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.08); backdrop-filter: blur(10px); border-radius: 12px; cursor: pointer; font-size: 16px; border: 1px solid rgba(255,255,255,0.05); transition: all 0.2s; }
+        .header-back:active { transform: scale(0.95); background: rgba(255,255,255,0.15); }
+        .header-tabs { display: flex; gap: 30px; font-size: 15px; font-weight: 600; }
+        .header-tab { opacity: 0.5; cursor: pointer; transition: all 0.3s; position: relative; text-transform: uppercase; font-size: 13px; }
+        .header-tab.active { opacity: 1; }
+        .header-tab.active::after { content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; background: var(--primary); border-radius: 50%; box-shadow: 0 0 10px var(--primary); }
+
+        .earning-overlay { position: fixed; top: 70px; left: 16px; background: rgba(18, 18, 26, 0.95); backdrop-filter: blur(20px); padding: 14px 18px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.08); z-index: 100; display: flex; align-items: center; gap: 14px; box-shadow: var(--shadow-card); min-width: 170px; }
+        .earning-icon { width: 44px; height: 44px; background: var(--gradient-secondary); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 20px; position: relative; }
+        .tier-badge { position: absolute; top: -6px; right: -6px; background: var(--gradient-gold); color: #000; font-size: 8px; padding: 3px 8px; border-radius: 10px; font-weight: 800; }
+        .earning-text { display: flex; flex-direction: column; }
+        .earning-label { font-size: 10px; opacity: 0.6; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; }
+        .earning-amount { font-size: 22px; font-weight: 800; color: var(--success); display: flex; align-items: center; gap: 4px; }
+
+        .scroll-progress { position: fixed; top: 0; left: 0; height: 3px; background: var(--gradient-primary); z-index: 1000; transition: width 0.4s; box-shadow: 0 0 15px var(--primary); }
+
+        .video-feed { height: 100vh; width: 100vw; overflow-y: scroll; scroll-snap-type: y mandatory; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; scrollbar-width: none; background: var(--darker); }
+        .video-feed::-webkit-scrollbar { display: none; }
+        
+        .video-container {
+            height: 100vh; width: 100vw; position: relative; scroll-snap-align: start; scroll-snap-stop: always;
+            background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center;
+        }
+        
+        .video-wrapper { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #000; }
+        
+        .video-player-container { 
+            position: absolute; width: 100%; height: 100%; z-index: 1; 
+            display: flex; align-items: center; justify-content: center;
+        }
+        
+        .video-loading {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 5;
+            display: flex; flex-direction: column; align-items: center; gap: 16px;
+        }
+        .video-loading i { font-size: 48px; color: var(--primary); animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .video-error {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 5; display: none;
+        }
+        .retry-btn { background: var(--gradient-primary); color: white; border: none; padding: 14px 32px; border-radius: 25px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 16px; }
+        
+        .video-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(5,5,8,0.3) 0%, transparent 40%, transparent 60%, rgba(5,5,8,0.6) 100%);
+            z-index: 2; pointer-events: none;
+        }
+
+        .sound-controls { position: absolute; top: 80px; right: 16px; z-index: 10; display: flex; flex-direction: column; gap: 12px; }
+        .sound-btn { width: 48px; height: 48px; background: rgba(0,0,0,0.6); backdrop-filter: blur(20px); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; border: 1px solid rgba(255,255,255,0.08); }
+        .sound-btn.muted { color: var(--gray); }
+        .sound-btn.unmuted { color: var(--success); border-color: rgba(0, 208, 132, 0.3); }
+
+        .side-actions { position: absolute; right: 12px; bottom: 20px; display: flex; flex-direction: column; align-items: center; gap: 18px; z-index: 10; }
+        .action-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; transition: transform 0.2s; }
+        .action-btn:active { transform: scale(0.95); }
+        .action-icon { width: 52px; height: 52px; background: rgba(255,255,255,0.08); backdrop-filter: blur(20px); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; border: 1px solid rgba(255,255,255,0.05); transition: all 0.3s; }
+        .action-btn.liked .action-icon { background: rgba(254, 44, 85, 0.2); border-color: rgba(254, 44, 85, 0.3); color: var(--primary); animation: heart-beat 0.4s ease; }
+        @keyframes heart-beat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+        .action-count { font-size: 12px; font-weight: 600; color: var(--light); text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        
+        .profile-pic { width: 52px; height: 52px; border-radius: 50%; border: 3px solid var(--light); overflow: hidden; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.3); background: var(--card); }
+        .profile-pic img { width: 100%; height: 100%; object-fit: cover; }
+        .follow-btn { position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%); width: 22px; height: 22px; background: var(--gradient-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 3px solid var(--dark); }
+        .follow-btn.following { background: var(--success); transform: translateX(-50%) rotate(360deg); transition: all 0.3s; }
+        
+        .music-disc { width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, #2a2a3a, #1a1a2a); animation: rotate 4s linear infinite; position: relative; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(255,255,255,0.1); }
+        .music-disc::before { content: ''; position: absolute; width: 20px; height: 20px; background: var(--dark); border-radius: 50%; border: 2px solid rgba(255,255,255,0.1); }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .video-info { position: absolute; bottom: 20px; left: 16px; right: 80px; z-index: 10; color: var(--light); }
+        .username { font-size: 15px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .verified { color: var(--secondary); font-size: 14px; }
+        .caption { font-size: 14px; line-height: 1.5; margin-bottom: 12px; opacity: 0.95; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .music-info { display: flex; align-items: center; gap: 10px; font-size: 12px; opacity: 0.85; }
+        .music-icon { font-size: 11px; color: var(--secondary); }
+        .scrolling-text { flex: 1; overflow: hidden; white-space: nowrap; }
+        .scrolling-text span { display: inline-block; animation: scrollText 10s linear infinite; }
+        @keyframes scrollText { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        .video-progress-container { position: absolute; bottom: 10px; left: 16px; right: 16px; z-index: 15; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); padding: 12px 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); display: none; }
+        .video-progress-container.show { display: block; animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .video-progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; overflow: hidden; }
+        .video-progress-fill { height: 100%; background: var(--gradient-secondary); border-radius: 2px; transition: width 0.1s linear; box-shadow: 0 0 10px rgba(37, 244, 238, 0.5); }
+        .video-earning-status { display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+        .video-earning-status .time { color: var(--gray); }
+        .video-earning-status .amount { color: var(--success); font-weight: 700; display: flex; align-items: center; gap: 4px; }
+
+        .completion-celebration { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); background: var(--gradient-gold); color: var(--darker); padding: 30px 50px; border-radius: 24px; text-align: center; z-index: 3000; opacity: 0; transition: all 0.5s; pointer-events: none; }
+        .completion-celebration.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        .completion-celebration i { font-size: 50px; margin-bottom: 10px; }
+        .completion-celebration .amount { font-size: 36px; font-weight: 900; margin-bottom: 5px; }
+
+        .threshold-alert { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9); background: var(--card); border: 1px solid rgba(255,255,255,0.08); border-radius: 28px; padding: 35px; text-align: center; z-index: 2000; width: 90%; max-width: 380px; opacity: 0; visibility: hidden; transition: all 0.4s; }
+        .threshold-alert.show { transform: translate(-50%, -50%) scale(1); opacity: 1; visibility: visible; }
+        .alert-icon { width: 90px; height: 90px; background: var(--gradient-secondary); border-radius: 50%; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; font-size: 40px; }
+        .alert-title { font-size: 24px; font-weight: 800; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .alert-text { font-size: 14px; color: var(--gray); margin: 12px 0 24px; }
+        .alert-amount { font-size: 42px; font-weight: 800; color: var(--success); margin-bottom: 28px; }
+        .btn-primary { background: var(--gradient-primary); color: white; border: none; padding: 16px 36px; border-radius: 28px; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; margin-bottom: 12px; }
+        .btn-secondary { background: transparent; color: var(--gray); border: 1px solid rgba(255,255,255,0.15); padding: 14px 36px; border-radius: 28px; font-size: 14px; font-weight: 500; cursor: pointer; width: 100%; }
+
+        .comment-section { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-radius: 28px 28px 0 0; z-index: 2001; transform: translateY(100%); transition: transform 0.4s; max-height: 75vh; display: flex; flex-direction: column; }
+        .comment-section.show { transform: translateY(0); }
+        .comment-header { padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; }
+        .comment-count { font-size: 16px; font-weight: 700; }
+        .close-comments { width: 36px; height: 36px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .comments-list { flex: 1; overflow-y: auto; padding: 20px; }
+        .comment { display: flex; gap: 14px; margin-bottom: 16px; }
+        .comment-avatar { width: 44px; height: 44px; border-radius: 50%; overflow: hidden; border: 2px solid rgba(255,255,255,0.08); flex-shrink: 0; }
+        .comment-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .comment-content { flex: 1; }
+        .comment-username { font-size: 14px; font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+        .verified-badge { color: var(--secondary); font-size: 12px; }
+        .comment-text { font-size: 14px; color: rgba(255,255,255,0.9); line-height: 1.5; margin-bottom: 6px; }
+        .comment-actions { display: flex; gap: 16px; font-size: 12px; color: var(--gray); }
+        .comment-input-container { padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; gap: 12px; align-items: center; }
+        .comment-input { flex: 1; background: rgba(255,255,255,0.06); border: none; padding: 14px 20px; border-radius: 24px; color: var(--light); font-size: 14px; outline: none; }
+        .send-btn { width: 46px; height: 46px; background: var(--gradient-primary); border: none; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+        .share-modal { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-radius: 28px 28px 0 0; z-index: 2001; transform: translateY(100%); transition: transform 0.4s; padding: 28px 24px; }
+        .share-modal.show { transform: translateY(0); }
+        .share-title { font-size: 18px; font-weight: 700; margin-bottom: 24px; text-align: center; }
+        .share-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 28px; }
+        .share-option { display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; }
+        .share-icon { width: 58px; height: 58px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 26px; background: rgba(255,255,255,0.06); }
+        .share-option.whatsapp .share-icon { background: #25d366; }
+        .share-option.facebook .share-icon { background: #1877f2; }
+        .share-option.twitter .share-icon { background: #1da1f2; }
+        .share-label { font-size: 12px; color: var(--gray); }
+
+        .toast { position: fixed; top: 100px; left: 50%; transform: translateX(-50%) translateY(-100px); background: var(--card); color: var(--light); padding: 14px 28px; border-radius: 28px; font-size: 14px; font-weight: 600; z-index: 3000; opacity: 0; transition: all 0.4s; display: flex; align-items: center; gap: 10px; border: 1px solid rgba(255,255,255,0.05); }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast-icon { color: var(--success); }
+
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1500; opacity: 0; visibility: hidden; transition: all 0.3s; }
+        .overlay.show { opacity: 1; visibility: visible; }
+
+        .sound-enabled-badge { position: fixed; top: 80px; right: 16px; background: var(--gradient-secondary); color: white; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; z-index: 100; display: none; align-items: center; gap: 6px; }
+        .sound-enabled-badge.show { display: flex; }
+
+/* ===== NAVIGATION SPINNER ===== */
+.spinner-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(10,10,15,.97);
+  backdrop-filter:blur(30px);
+  -webkit-backdrop-filter:blur(30px);
+  z-index:10000;
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:24px;
+}
+.spinner-overlay.active{display:flex}
+.spinner-ring{width:56px;height:56px;position:relative}
+.spinner-ring::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  border-radius:50%;
+  border:3px solid transparent;
+  border-top-color:var(--primary);
+  border-right-color:#ff6b6b;
+  animation:spinNav .8s linear infinite;
+}
+.spinner-ring::after{
+  content:'';
+  position:absolute;
+  inset:8px;
+  border-radius:50%;
+  border:3px solid transparent;
+  border-bottom-color:var(--secondary);
+  border-left-color:var(--accent);
+  animation:spinNav 1.2s linear infinite reverse;
+}
+@keyframes spinNav{to{transform:rotate(360deg)}}
+.spinner-text{color:rgba(255,255,255,.5);font-size:14px;font-weight:500;letter-spacing:.5px}
+.spinner-sub{font-size:12px;color:rgba(255,255,255,.25);margin-top:-16px}
+
+        .redirect-modal .redirect-text {
+            font-size: 14px;
+            color: var(--gray);
+            margin-bottom: 28px;
+            line-height: 1.6;
+            min-height: 40px;
+        }
+
+        .redirect-modal.show {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+            visibility: visible;
+            border: 1px solid rgba(254, 44, 85, 0.3);
+            box-shadow:
+                0 25px 50px -12px rgba(0,0,0,.8),
+                0 0 30px rgba(254,44,85,.1);
+        }
+
+        .video-feed.locked {
+            pointer-events: none;
+            filter: blur(2px);
+        }
+
+        @media (min-width: 768px) {
+            .app-container { max-width: 414px; margin: 0 auto; left: 50%; transform: translateX(-50%); width: 100%; }
+            .video-container { max-width: 414px; margin: 0 auto; }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-logo"><i class="fas fa-play"></i></div>
+        <div style="color: var(--gray); font-size: 14px;">Loading Pink App...</div>
+        <div class="loading-bar"><div class="loading-progress" id="loadingProgress"></div></div>
+    </div>
+
+    <div class="shuffle-indicator" id="shuffleIndicator">
+        <div class="shuffle-icon"><i class="fas fa-random"></i></div>
+        <div class="shuffle-text">Shuffling Videos...</div>
+        <div class="shuffle-subtext">Get ready for fresh content!</div>
+    </div>
+
+    <div class="app-container" id="mainApp">
+        <div class="scroll-progress" id="progressBar"></div>
+        <div class="sound-enabled-badge" id="soundEnabledBadge"><i class="fas fa-volume-up"></i> Sound On</div>
+        
+        <div class="video-progress-container" id="videoProgressContainer">
+            <div class="video-progress-bar"><div class="video-progress-fill" id="videoProgressFill" style="width: 0%"></div></div>
+            <div class="video-earning-status"><span class="time" id="videoTime">0:00 / 1:00</span><span class="amount"><i class="fas fa-bolt"></i> Earning: <span id="currentVideoEarning">0</span> / <span id="maxVideoEarning">3</span> coins</span></div>
+        </div>
+
+        <div class="completion-celebration" id="completionCelebration">
+            <i class="fas fa-check-circle"></i>
+            <div class="amount">+<span id="completedAmount">3</span> coins</div>
+            <div class="text">Video Completed!</div>
+        </div>
+
+        <div class="header">
+            <div class="header-back" onclick="navigateWithLoader('pink-earn.html')"><i class="fas fa-arrow-left"></i></div>
+            <div class="header-tabs">
+                <div class="header-tab active">For You</div>
+            </div>
+        </div>
+
+        <div class="earning-overlay" id="earningOverlay">
+            <div class="earning-icon"><i class="fas fa-coins"></i><span class="tier-badge" id="tierBadge">PREMIUM</span></div>
+            <div class="earning-text">
+                <span class="earning-label">Earnings</span>
+                <div class="earning-amount"><i class="fas fa-coins" style="font-size:14px;color:var(--accent);margin-right:4px;"></i><span id="totalEarnings">0.00</span></div>
+            </div>
+        </div>
+
+        <div class="video-feed" id="videoFeed"></div>
+
+        <div class="threshold-alert" id="thresholdAlert">
+            <div class="alert-icon"><i class="fas fa-trophy"></i></div>
+            <div class="alert-title">Cash Out Ready!</div>
+            <div class="alert-text">You've reached the minimum cash out threshold!</div>
+            <div class="alert-amount"><i class="fas fa-coins"></i> <span id="alertAmount">1000</span> coins</div>
+            <button class="btn-primary" onclick="withdrawEarnings()">Cash Out Now</button>
+            <button class="btn-secondary" onclick="closeThreshold()">Keep Watching</button>
+        </div>
+
+        <div class="overlay" id="redirectOverlay" onclick="closeRedirectModal()"></div>
+        <div class="redirect-modal" id="redirectModal">
+            <div class="redirect-icon"><i class="fas fa-crown"></i></div>
+            <div class="redirect-title">Unlock Full Access</div>
+            <div class="redirect-text" id="redirectModalText">
+                Subscribe to a plan to start watching videos and earning coins instantly!
+            </div>
+            <div class="redirect-features">
+                <div class="redirect-feature"><i class="fas fa-check-circle"></i><span>Watch unlimited videos</span></div>
+                <div class="redirect-feature"><i class="fas fa-check-circle"></i><span>Earn 3 coins per video watched</span></div>
+                <div class="redirect-feature"><i class="fas fa-check-circle"></i><span>1 coin per like & comment</span></div>
+                <div class="redirect-feature"><i class="fas fa-check-circle"></i><span>Withdraw earnings instantly</span></div>
+            </div>
+            <button class="btn-gold" onclick="redirectToPlans()">View Plans & Pricing</button>
+            <button class="btn-secondary" onclick="closeRedirectModal()">Maybe Later</button>
+        </div>
+
+        <div class="overlay" id="commentOverlay" onclick="closeComments()"></div>
+        <div class="comment-section" id="commentSection">
+            <div class="comment-header">
+                <span class="comment-count"><span id="commentCount">0</span> comments</span>
+                <div class="close-comments" onclick="closeComments()"><i class="fas fa-times"></i></div>
+            </div>
+            <div class="comments-list" id="commentsList"></div>
+            <div class="comment-input-container">
+                <input type="text" class="comment-input" id="commentInput" placeholder="Add a comment...">
+                <button class="send-btn" onclick="postComment()"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+
+        <div class="overlay" id="shareOverlay" onclick="closeShare()"></div>
+        <div class="share-modal" id="shareModal">
+            <div class="share-title">Share to</div>
+            <div class="share-options">
+                <div class="share-option whatsapp" onclick="shareTo('whatsapp')"><div class="share-icon"><i class="fab fa-whatsapp"></i></div><span class="share-label">WhatsApp</span></div>
+                <div class="share-option facebook" onclick="shareTo('facebook')"><div class="share-icon"><i class="fab fa-facebook-f"></i></div><span class="share-label">Facebook</span></div>
+                <div class="share-option twitter" onclick="shareTo('twitter')"><div class="share-icon"><i class="fab fa-twitter"></i></div><span class="share-label">Twitter</span></div>
+                <div class="share-option copy" onclick="shareTo('copy')"><div class="share-icon"><i class="fas fa-link"></i></div><span class="share-label">Copy Link</span></div>
+            </div>
+            <button class="btn-secondary" onclick="closeShare()">Cancel</button>
+        </div>
+
+        <div class="toast" id="toast"><i class="fas fa-check-circle toast-icon"></i><span id="toastMessage">Action completed!</span></div>
+    </div>
+
+    <div class="spinner-overlay" id="spinnerOverlay">
+        <div class="spinner-ring"></div>
+        <div class="spinner-text">Loading secure session...</div>
+        <div class="spinner-sub">Please wait</div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBUEKYA5x1T2Qb3T8Z6rP5qv5jmfTXlRU0",
+            authDomain: "pink-app-5ecd1.firebaseapp.com",
+            projectId: "pink-app-5ecd1",
+            storageBucket: "pink-app-5ecd1.firebasestorage.app",
+            messagingSenderId: "659145722582",
+            appId: "1:659145722582:web:1e0778ce8aa62dff129777"
+        };
+
+        let db;
+        let auth;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            auth = firebase.auth();
+
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    console.log('User signed in:', user.uid);
+                    checkUserActivation();
+                } else {
+                    console.log('No user signed in');
+                    showLockOverlay('Please log in to start earning.');
+                }
+            });
+
+        } catch(e) {
+            console.log('Firebase init failed', e);
+        }
+
+        const ORIGINAL_VIDEO_IDS = [
+            'kJQP7kiw5Fk', 'JGwWNGJdvx8', 'RgKAFK5djSk', 'OPf0YbXqDm0', '9bZkp7q19f0',
+            '2Vv-BfVoq4g', '3JZ4pnNtyxQ', 'CevxZvSJLk8', 'YQHsXMglC9A', '60ItHLz5WEA',
+            'lp-EO5I60KA', 'ktvTqknDobU', '6Dh-RL__uN4', 'hT_nvWreIhg', 'fRh_vgS2dFE',
+            'SlPhMPnQ58k', '09R8_2nJtjg', 'uelHwf8o7_U', 'KQ6zr6kCPj8', 'NF-kLy44Hls',
+            'dT2owtxkU8k', '450p7goxZqg', 'QK8mJJJvaes', 'YqeW9_5kURI', 'AJtDXIazrMo',
+            '2vjPBrBU-TM', 'JRfuAukYTKg', 'O-zpOMYRi0w', '0KSOMA3QBU0', '8UVNT4wvIGY',
+            'pXRviuL6vMY', 'PT2_F-1esPk', 'EgT_us6AsDg', 'UceaB4D0jpo', '9Sc-ir2UwGU',
+            '3AtDnEC4zak', 'IcrbM1l_BoI', 'fLexgOxsZu0', '5NV6Rdv1a3I', 'dhYOPzcsbGM',
+            'FM7MFYoylVs', 'CHekNnySAfM', 'wyx6JDQCslE', '34Na4j8AVgA', 'nfWlot6h_JM',
+            'YVkUvmDQ3HY', 'K0ibBPhiaG0', '7wtfhZwyrcc', '8j9zMok6two', 'ZbZSe6N_BXs',
+            'ru0K8uYEZWw', '8SbUC-UaAxE', '1w7OgIMMRc4', 'HgzGwKwLmgM', 'k2qgadSvNyU',
+            'GxBSyx85Kp8', 'YykjpeuMNEk', 'VbfpW0pbvaU', 'kXYiU_JCYtU', 'hLQl3WQQoQ0',
+            'QGJuMBdaqIw', 'papuvlVeZg8', 'lWA2pjMjpBs', 'tAGnKpE4NCI', 'nCkpzqqog4k',
+            'Io0fBr1XBUA', 'vJwKKKd2ZYE', 'nfs8NYg7yQM', 'qrO4YZeyl0I', 'hTWKbfoikeg',
+            'fJ9rUzIMcZQ', 'e-fA-gBCkj0', 'DUT5rEU6pqM', 'wXqIjmcED-Q', '4m1EFMoRFvY',
+            'bwmSjveL3Lc', 'Zi_XLOBDo_Y', 'bESGLojNYSo', 'KY44zvhWhp4', 'qFLhGq0060w',
+            'e-ORhEE9VVg', 'QcIy9NiNbmo', 'fKopy74weus', 'DjgfD4MGq4s', 'Rter-NCg-Eg',
+            'M11SvDtPBhA', 'mWRsgZuwf_8', 'dQw4w9WgXcQ', 'btPJPFnesV4', 'yPYZc3kP4T8',
+            'sQgd6MccwZc', '1G4isv_Fylg', 'RBumgq5yVrA', 'SxyJDzYw3A8', 'BYDKK95cpdc',
+            'yyDUC1LUXSU', 'rYEDA3JcQqw', 'LjhCEhWiKXk', 'S2ujKMXh0S8', 'g9HjhjEgQec',
+            'J_ub7Etch2U', 'KEI4qSrkPAs', 'kffacxfA7G4', 'oyEuk8j8imI', 'ux8-EbW6DUI',
+            'rtOvBOTryX4', 'xTlNMmZKwpA', 'gH476CxJfg', 'HQnC1UHBvWA', 'MYSVMgRr6pw',
+            '5qm8PH4xAss', '09R8_2nJtjg', 'UprcpdwuwCg', 'YqeW9_5kURI', 'tvTRZJ-4EyI',
+            'Dcc8L4VBb3A', 'VbfpW0pbvaU', '8j9zMok6two', 'ekzHIouo8Q4', 'nCkpzqqog4k',
+            'hT_nvWreIhg', 'cI0wUoCLnLk', 'SMKPKGW083c', 'lWA2pjMjpBs', 'tAGnKpE4NCI',
+            'swXy4zD3Ghg', 'pRpeEdMmmQ0', '2vjPBrBU-TM', 'kJQP7kiw5Fk', 'JGwWNGJdvx8',
+            'RgKAFK5djSk', 'OPf0YbXqDm0', '9bZkp7q19f0', '2Vv-BfVoq4g', '3JZ4pnNtyxQ'
+        ];
+
+        let currentVideoIds = shuffleArray([...ORIGINAL_VIDEO_IDS]);
+        let isActivated = true;
+        let currentTier = localStorage.getItem('pinkApp_currentTier') || 'premium';
+        let currentCoins = parseFloat(localStorage.getItem('pinkApp_coins')) || 0;
+        let players = {};
+        let currentVideoIndex = -1;
+        let isYouTubeReady = false;
+        let isShuffling = false;
+        let globalSoundEnabled = localStorage.getItem('pinkApp_globalSoundEnabled') !== 'false';
+        let likedVideos = new Set(JSON.parse(localStorage.getItem('pinkApp_likedVideos') || '[]'));
+        let earnedVideos = new Set(JSON.parse(localStorage.getItem('pinkApp_earnedVideos') || '[]'));
+        let videoWatchTime = {};
+        let adminVideoData = null;
+        
+        let activeEarningTimer = null;
+        let activeEarningVideoId = null;
+        let currentVideoEarnings = 0;
+        let currentVideoMaxEarnings = 0;
+        let isVideoCompleted = false;
+        
+        let navigationTimeoutId = null;
+        let isLoaderActive = false;
+        
+        const CONFIG = {
+            premium: { earnPerVideo: 1, likeReward: 0.5, followReward: 0, commentReward: 0.5, withdrawalThreshold: 300 }
+        };
+
+        const CAPTION_CATEGORIES = {
+            music: {
+                tags: ['#music','#afrobeats','#hiphop','#dance','#viral','#hits','#playlist','#newmusic'],
+                templates: [
+                    "🔥 This track is absolutely fire! The beat drops are insane {tags}",
+                    "🎵 Can't get this song out of my head! Pure vibes {tags}",
+                    "💃 This makes me want to dance all night long! {tags}",
+                    "🎧 On repeat for the 100th time today! {tags}",
+                    "🌍 Afrobeats to the world! This is global sound {tags}",
+                    "⚡ The energy in this track is unmatched! {tags}",
+                    "🎶 When the bass hits... goosebumps! {tags}",
+                    "🔊 Turn up the volume! This is a certified banger {tags}",
+                    "🎤 The vocals on this are incredible! {tags}",
+                    "✨ This song just hits different at midnight {tags}"
+                ]
+            },
+            comedy: {
+                tags: ['#comedy','#funny','#viral','#laugh','#meme','#hilarious','#trending','#skit'],
+                templates: [
+                    "😂 This had me rolling on the floor! Too funny {tags}",
+                    "🤣 I can't breathe! This is pure comedy gold {tags}",
+                    "😆 Who else watched this 10 times? {tags}",
+                    "🎭 The timing on this is perfect! Comedy genius {tags}",
+                    "😹 This never gets old! Still laughing {tags}",
+                    "🤪 When you need a good laugh, watch this! {tags}",
+                    "😂😂😂 My stomach hurts from laughing! {tags}",
+                    "🎬 Best skit I've seen all week! {tags}"
+                ]
+            },
+            lifestyle: {
+                tags: ['#lifestyle','#daily','#vlog','#motivation','#inspiration','#life','#mindset'],
+                templates: [
+                    "☀️ Morning motivation right here! Start your day right {tags}",
+                    "🌟 This is the content I signed up for! {tags}",
+                    "💯 Real talk! This message is so important {tags}",
+                    "🙌 Never give up! This inspired me today {tags}",
+                    "✨ Small steps every day lead to big changes {tags}",
+                    "🌈 Positive vibes only! Love this energy {tags}",
+                    "💪 This just motivated me to work harder {tags}",
+                    "🔥 The grind never stops! Let's get it {tags}"
+                ]
+            },
+            tech: {
+                tags: ['#tech','#technology','#review','#gadgets','#innovation','#future','#ai'],
+                templates: [
+                    "📱 This gadget review is exactly what I needed! {tags}",
+                    "💻 Tech of the future is here! Mind blown {tags}",
+                    "🚀 This innovation changes everything! {tags}",
+                    "🔧 Detailed breakdown! Love the tech analysis {tags}",
+                    "⚡ This device is faster than I expected! {tags}",
+                    "🎮 The specs on this are insane! Must watch {tags}",
+                    "📡 Future tech is wild! Can't believe this exists {tags}",
+                    "🤖 AI is getting scary good! What do you think? {tags}"
+                ]
+            },
+            sports: {
+                tags: ['#sports','#football','#highlights','#goals','#fitness','#training','#athlete'],
+                templates: [
+                    "⚽ What a goal! This highlight is insane {tags}",
+                    "🏆 Championship moments! History being made {tags}",
+                    "🔥 The skill level here is unbelievable! {tags}",
+                    "💪 Training motivation! Beast mode activated {tags}",
+                    "🏅 This play deserves an award! Incredible {tags}",
+                    "⚡ Speed and power! Perfect execution {tags}",
+                    "🥇 Legendary performance! Take notes {tags}",
+                    "🏟️ Stadium was electric! Wish I was there {tags}"
+                ]
+            },
+            education: {
+                tags: ['#education','#learn','#tutorial','#knowledge','#study','#facts','#science'],
+                templates: [
+                    "🧠 Learned something new today! Great explanation {tags}",
+                    "📚 This tutorial is so clear and helpful! {tags}",
+                    "💡 Mind blown! Never knew this before {tags}",
+                    "🎓 Educational content at its finest! {tags}",
+                    "📖 Knowledge is power! Taking notes {tags}",
+                    "🔍 Deep dive analysis! Love the details {tags}",
+                    "🧪 Science is amazing! This experiment is wild {tags}",
+                    "🌍 Understanding our world better thanks to this {tags}"
+                ]
+            }
+        };
+
+        const FIRST_NAMES = ['Chioma', 'Emmanuel', 'Ngozi', 'Olumide', 'Fatima', 'Chinedu', 'Amina', 'Tunde', 'Ifeoma', 'Obinna', 'Zainab', 'Kelechi', 'Yusuf', 'Amaka', 'Ibrahim', 'Nneka', 'Segun', 'Chidi', 'Halima', 'Oluwaseun', 'Blessing', 'Chukwuemeka', 'Aisha', 'Tosin', 'Uche', 'Abdullahi', 'Folake', 'Emeka', 'Zara', 'Jide', 'Amara', 'Bola', 'Chika', 'Dayo', 'Ebere', 'Femi', 'Gloria', 'Hassan', 'Idris', 'Janet', 'Kunle', 'Lola', 'Musa', 'Nike', 'Peter', 'Queen', 'Rita', 'Sade', 'Uzo', 'Victor'];
+        
+        const LAST_NAMES = ['Okonkwo', 'Adeyemi', 'Okafor', 'Mohammed', 'Nwosu', 'Abubakar', 'Adeleke', 'Eze', 'Lawal', 'Obi', 'Balogun', 'Ibrahim', 'Chukwu', 'Ojo', 'Sani', 'Onyekachi', 'Ajayi', 'Kalu', 'Yakubu', 'Ogunleye', 'Ogbonna', 'Akinwale', 'Oluwole', 'Abdullahi', 'Osagie', 'Nnamdi', 'Babatunde', 'Okeke', 'Idris', 'Ogundipe', 'Adebayo', 'Okonkwo', 'Musa', 'Olayinka', 'Chukwuma', 'Adesina', 'Okoro', 'Bello', 'Odeyemi', 'Adegoke', 'Onwumere', 'Olatunji', 'Danladi', 'Osho', 'Adeleke', 'Suleiman', 'Ogunwande', 'Chike', 'Nwachukwu', 'Adeyemi'];
+
+        const COMMENTS = [
+            "This song is a banger! On repeat all day! 🔥", "The beat is insane! Producer killed it! 🎧",
+            "This artist never misses! Consistently great! 🎯", "Who else is dancing in their room right now? 💃",
+            "This song just became my anthem! Motivation! 🎵", "The lyrics are so deep! Real talk! 📝",
+            "This is going straight to my playlist! Fire! 🔥", "The music video is so creative! Visuals! 🎬",
+            "Who else knows all the lyrics already? 🎤", "This collaboration is everything! Dream team! 🤝",
+            "The vibe of this song is unmatched! Energy! ⚡", "This is why Afrobeats is taking over the world! 🌍",
+            "My neighbors are tired of me playing this! Loud! 🔊", "This song hits different at night! Midnight vibes! 🌙",
+            "Who else is feeling nostalgic listening to this? 🥺", "Absolute masterpiece! Can't skip this one! 🏆",
+            "This deserves a Grammy! No cap! 🎖️", "The chorus is so catchy! Stuck in my head! 🎶",
+            "Best song released this year! Facts! 📈", "This makes me proud to be African! 🌍❤️"
+        ];
+
+        function showLoader() {
+            document.getElementById('spinnerOverlay').classList.add('active');
+            isLoaderActive = true;
+            return 600;
+        }
+
+        function hideLoader() {
+            if (!isLoaderActive) return;
+            document.getElementById('spinnerOverlay').classList.remove('active');
+            isLoaderActive = false;
+            if (navigationTimeoutId) {
+                clearTimeout(navigationTimeoutId);
+                navigationTimeoutId = null;
+            }
+        }
+
+        function navigateWithLoader(url) {
+            showLoader();
+            navigationTimeoutId = setTimeout(() => {
+                window.location.href = url;
+            }, 600);
+        }
+
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted && isLoaderActive) hideLoader();
+        });
+
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden && isLoaderActive) {
+                setTimeout(() => {
+                    if (!document.hidden && document.getElementById('spinnerOverlay').classList.contains('active')) {
+                        hideLoader();
+                    }
+                }, 100);
+            }
+        });
+
+        window.addEventListener('popstate', function() {
+            if (isLoaderActive) hideLoader();
+        });
+
+        document.getElementById('spinnerOverlay').addEventListener('click', function(e) {
+            if (isLoaderActive) hideLoader();
+        });
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function getCategory(index) {
+            const categories = Object.keys(CAPTION_CATEGORIES);
+            return categories[index % categories.length];
+        }
+
+        function generateCaption(index, videoId) {
+            const category = getCategory(index);
+            const catData = CAPTION_CATEGORIES[category];
+            const template = catData.templates[index % catData.templates.length];
+            const shuffledTags = shuffleArray([...catData.tags]);
+            const selectedTags = shuffledTags.slice(0, Math.floor(Math.random() * 2) + 3).join(' ');
+            return template.replace('{tags}', selectedTags);
+        }
+
+        function getVideoData(videoId, index) {
+            if (adminVideoData) {
+                const adminVideo = adminVideoData.find(v => (v.id || v.youtubeId) === videoId);
+                if (adminVideo) {
+                    return {
+                        caption: adminVideo.caption || adminVideo.title || generateCaption(index, videoId),
+                        creator: adminVideo.creator || adminVideo.channel || `${FIRST_NAMES[index % FIRST_NAMES.length]} ${LAST_NAMES[index % LAST_NAMES.length]}`
+                    };
+                }
+            }
+            return {
+                caption: generateCaption(index, videoId),
+                creator: `${FIRST_NAMES[index % FIRST_NAMES.length]} ${LAST_NAMES[index % LAST_NAMES.length]}`
+            };
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            simulateLoading();
+        });
+
+        function simulateLoading() {
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 20;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        document.getElementById('loadingScreen').classList.add('hidden');
+                        initApp();
+                    }, 500);
+                }
+                document.getElementById('loadingProgress').style.width = progress + '%';
+            }, 100);
+        }
+
+        function initApp() {
+            updateTierBadge();
+            updateEarningsDisplay();
+            loadYouTubeAPI();
+            generateVideoContainers();
+            initAdminVideoSync();
+            initEarnLockCheck();
+            cleanupOldDailyCompletions();
+        }
+
+        function initAdminVideoSync() {
+            if (!db) return;
+            db.collection('appConfig').doc('videos').onSnapshot((doc) => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data.videos && Array.isArray(data.videos) && data.videos.length > 0) {
+                        const newIds = data.videos.map(v => v.id || v.youtubeId);
+                        if (JSON.stringify(newIds) !== JSON.stringify(currentVideoIds)) {
+                            currentVideoIds = shuffleArray([...newIds]);
+                            adminVideoData = data.videos;
+                            showToast('🎬 Admin updated video list!');
+                            setTimeout(() => { generateVideoContainers(); }, 1500);
+                        }
+                    } else if (data.youtubeIds && data.youtubeIds.length > 0) {
+                        currentVideoIds = shuffleArray([...data.youtubeIds]);
+                        adminVideoData = null;
+                        showToast('🎬 Admin updated video list!');
+                        setTimeout(() => { generateVideoContainers(); }, 1500);
+                    }
+                }
+            });
+        }
+
+        function initEarnLockCheck() {
+            if (!db) return;
+
+            db.collection('config').doc('earnControl').onSnapshot((doc) => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    const globalLocked = data.globalLocked === true;
+                    const lockMessage = data.lockMessage || 'Earn section is temporarily unavailable.';
+
+                    if (globalLocked) {
+                        showLockOverlay(lockMessage);
+                        return;
+                    }
+
+                    checkUserActivation();
+                }
+            }, (err) => console.error('Earn lock error:', err));
+        }
+
+        function checkUserActivation() {
+            const currentUser = firebase.auth().currentUser;
+
+            if (!currentUser) {
+                showLockOverlay('Please log in to start earning.');
+                return;
+            }
+
+            db.collection('users').doc(currentUser.uid).get().then((doc) => {
+
+                if (!doc.exists) {
+                    showLockOverlay('Account not found. Please sign up first.');
+                    return;
+                }
+
+                const userData = doc.data();
+
+                if (userData.earnEnabled === false) {
+                    showLockOverlay('Your account is not yet activated. Please subscribe to a plan.');
+                    return;
+                }
+
+                if (!userData.isActivated) {
+                    showLockOverlay('Subscribe to a plan to start watching and earning coins!');
+                    return;
+                }
+
+                hideLockOverlay();
+
+            }).catch((err) => {
+                console.error('User check error:', err);
+                showLockOverlay('Unable to verify account. Please try again.');
+            });
+        }
+
+        function showLockOverlay(message) {
+            const overlay = document.getElementById('redirectOverlay');
+            const modal = document.getElementById('redirectModal');
+            const textEl = document.getElementById('redirectModalText');
+
+            if (textEl) textEl.textContent = message;
+
+            const btnGold = document.querySelector('.btn-gold');
+            if (btnGold) btnGold.textContent = 'View Plans & Pricing';
+
+            overlay.classList.add('show');
+            modal.classList.add('show');
+
+            if (players[currentVideoIndex]) {
+                try {
+                    players[currentVideoIndex].pauseVideo();
+                } catch(e) {}
+            }
+        }
+
+        function hideLockOverlay() {
+            document.getElementById('redirectOverlay').classList.remove('show');
+            document.getElementById('redirectModal').classList.remove('show');
+        }
+
+        function generateVideoContainers() {
+            const feed = document.getElementById('videoFeed');
+            feed.innerHTML = '';
+            
+            currentVideoIds.forEach((videoId, index) => {
+                const videoData = getVideoData(videoId, index);
+                const creator = videoData.creator;
+                const caption = videoData.caption;
+                const avatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${creator}${index}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
+                const comments = (Math.random() * 8 + 1.5).toFixed(1) + 'K';
+                const likes = (parseFloat(comments) * (15 + Math.random() * 25)).toFixed(1) + 'K';
+                
+                const container = document.createElement('div');
+                container.className = 'video-container';
+                container.dataset.index = index;
+                container.dataset.videoId = videoId;
+                container.dataset.creator = creator;
+                container.dataset.comments = comments;
+                container.innerHTML = `
+                    <div class="video-wrapper">
+                        <div class="video-loading" id="loading-${index}"><i class="fas fa-spinner"></i></div>
+                        <div class="video-error" id="error-${index}">
+                            <i class="fas fa-exclamation-circle" style="font-size: 48px; color: var(--gray);"></i>
+                            <p>Failed to load video</p>
+                            <button class="retry-btn" onclick="retryVideo(${index})">Try Again</button>
+                        </div>
+                        <div class="video-player-container" id="player-container-${index}"></div>
+                    </div>
+                    <div class="video-overlay"></div>
+                    
+                    <div class="sound-controls" id="soundControls-${index}">
+                        <div class="sound-btn ${globalSoundEnabled ? 'unmuted' : 'muted'}" onclick="toggleGlobalSound()">
+                            <i class="fas fa-${globalSoundEnabled ? 'volume-up' : 'volume-mute'}"></i>
+                        </div>
+                    </div>
+                    <div class="side-actions">
+                        <div class="action-btn" onclick="handleAction(() => toggleFollow(this, ${index}))">
+                            <div class="profile-pic"><img src="${avatar}" alt="${creator}"></div>
+                            <div class="follow-btn" id="follow-${index}"><i class="fas fa-plus"></i></div>
+                        </div>
+                        <div class="action-btn ${likedVideos.has(videoId) ? 'liked' : ''}" onclick="handleAction(() => toggleLike(this, ${index}))" id="like-btn-${index}">
+                            <div class="action-icon"><i class="fas fa-heart"></i></div>
+                            <span class="action-count">${likes}</span>
+                        </div>
+                        <div class="action-btn" onclick="handleAction(() => openComments(${index}))">
+                            <div class="action-icon"><i class="fas fa-comment-dots"></i></div>
+                            <span class="action-count">${comments}</span>
+                        </div>
+                        <div class="action-btn" onclick="handleAction(() => openShare(${index}))">
+                            <div class="action-icon"><i class="fas fa-share"></i></div>
+                            <span class="action-count">${likes}</span>
+                        </div>
+                        <div class="action-btn"><div class="music-disc"></div></div>
+                    </div>
+                    <div class="video-info">
+                        <div class="username">@${creator.replace(/\s/g, '').toLowerCase()}<<i class="fas fa-check-circle verified"></i></div>
+                        <div class="caption">${caption}</div>
+                        <div class="music-info">
+                            <i class="fas fa-music music-icon"></i>
+                            <div class="scrolling-text"><span>${creator} • Original Sound &nbsp;&nbsp;&nbsp; MUSIC • AFROBEATS &nbsp;&nbsp;&nbsp;</span></div>
+                        </div>
+                    </div>
+                `;
+                feed.appendChild(container);
+            });
+            
+            setupIntersectionObserver();
+        }
+
+        function handleAction(actionFn) {
+            const currentUser = firebase.auth().currentUser;
+
+            if (!currentUser) {
+                showLockOverlay('Please log in to interact with videos.');
+                return;
+            }
+
+            db.collection('users').doc(currentUser.uid).get().then((doc) => {
+
+                if (!doc.exists) {
+                    showLockOverlay('Account not found.');
+                    return;
+                }
+
+                const userData = doc.data();
+
+                db.collection('config').doc('earnControl').get().then((lockDoc) => {
+
+                    if (lockDoc.exists && lockDoc.data().globalLocked === true) {
+                        showLockOverlay(
+                            lockDoc.data().lockMessage ||
+                            'Earn section is temporarily unavailable.'
+                        );
+                        return;
+                    }
+
+                    if (userData.earnEnabled === false) {
+                        showLockOverlay('Your account is not yet activated.');
+                        return;
+                    }
+
+                    if (!userData.isActivated) {
+                        showLockOverlay('Subscribe to a plan to unlock all features!');
+                        return;
+                    }
+
+                    actionFn();
+                });
+            });
+        }
+
+        function showRedirectModal() {
+            document.getElementById('redirectOverlay').classList.add('show');
+            document.getElementById('redirectModal').classList.add('show');
+        }
+
+        function closeRedirectModal() {
+            document.getElementById('redirectOverlay').classList.remove('show');
+            document.getElementById('redirectModal').classList.remove('show');
+        }
+
+        const originalCloseRedirect = closeRedirectModal;
+
+        closeRedirectModal = function() {
+
+            db.collection('config').doc('earnControl').get().then((doc) => {
+
+                if (doc.exists && doc.data().globalLocked === true) {
+                    showToast('Earn section is currently locked by admin');
+                    return;
+                }
+
+                const currentUser = firebase.auth().currentUser;
+
+                if (!currentUser) {
+                    showToast('Please log in first');
+                    return;
+                }
+
+                db.collection('users').doc(currentUser.uid).get().then((userDoc) => {
+
+                    if (userDoc.exists) {
+                        const u = userDoc.data();
+
+                        if (!u.isActivated || u.earnEnabled === false) {
+                            showToast('Account not activated. Subscribe to continue.');
+                            return;
+                        }
+                    }
+
+                    document.getElementById('redirectOverlay').classList.remove('show');
+                    document.getElementById('redirectModal').classList.remove('show');
+                });
+            });
+        };
+
+        function redirectToPlans() {
+
+            const currentUser = firebase.auth().currentUser;
+
+            if (!currentUser) {
+                showToast('Please log in first');
+                setTimeout(() => navigateWithLoader('pink-login.html'), 1500);
+                return;
+            }
+
+            navigateWithLoader('pink-plans.html');
+        }
+
+        function loadYouTubeAPI() {
+            if (window.YT && window.YT.Player) {
+                isYouTubeReady = true;
+                return;
+            }
+            const tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/iframe_api";
+            document.head.appendChild(tag);
+            window.onYouTubeIframeAPIReady = () => { isYouTubeReady = true; };
+        }
+
+        function setupIntersectionObserver() {
+            const options = { root: document.getElementById('videoFeed'), threshold: 0.6 };
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const index = parseInt(entry.target.dataset.index);
+                        handleVideoVisible(index);
+                    }
+                });
+            }, options);
+            
+            document.querySelectorAll('.video-container').forEach(container => observer.observe(container));
+        }
+
+        function handleVideoVisible(index) {
+            if (index === currentVideoIds.length - 1 && !isShuffling) {
+                setTimeout(() => shuffleAndRestart(), 2000);
+            }
+            
+            if (currentVideoIndex === index) return;
+            
+            if (currentVideoIndex !== -1) {
+                stopVideo(currentVideoIndex);
+            }
+            
+            currentVideoIndex = index;
+            
+            const container = document.querySelector(`[data-index="${index}"]`);
+            const videoId = container.dataset.videoId;
+            const playerContainer = document.getElementById(`player-container-${index}`);
+            
+            cleanupDistantPlayers(index);
+            
+            if (!players[index]) {
+                createPlayer(index, videoId, playerContainer);
+            } else {
+                try {
+                    players[index].playVideo();
+                    if (globalSoundEnabled) {
+                        players[index].unMute();
+                        players[index].setVolume(100);
+                    } else {
+                        players[index].mute();
+                    }
+                } catch(e) { console.error('Play error:', e); }
+            }
+            
+            document.getElementById(`loading-${index}`).style.display = 'none';
+        }
+
+        function shuffleAndRestart() {
+            if (isShuffling) return;
+            isShuffling = true;
+            
+            const indicator = document.getElementById('shuffleIndicator');
+            indicator.classList.add('show');
+            
+            Object.keys(players).forEach(idx => {
+                const i = parseInt(idx);
+                if (players[i]) {
+                    try {
+                        players[i].destroy();
+                    } catch(e) {}
+                    delete players[i];
+                }
+            });
+            players = {};
+            currentVideoIndex = -1;
+            videoWatchTime = {};
+            
+            currentVideoIds = shuffleArray([...ORIGINAL_VIDEO_IDS]);
+            
+            setTimeout(() => {
+                generateVideoContainers();
+                
+                const feed = document.getElementById('videoFeed');
+                feed.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                setTimeout(() => {
+                    indicator.classList.remove('show');
+                    isShuffling = false;
+                    showToast('🎲 Videos shuffled! Fresh content ready!');
+                }, 1000);
+            }, 1500);
+        }
+
+        function createPlayer(index, videoId, container) {
+            if (!isYouTubeReady || !window.YT || !window.YT.Player) {
+                setTimeout(() => createPlayer(index, videoId, container), 500);
+                return;
+            }
+            
+            try {
+                players[index] = new YT.Player(container, {
+                    videoId: videoId,
+                    playerVars: {
+                        autoplay: 1, controls: 0, disablekb: 1, fs: 0, iv_load_policy: 3,
+                        modestbranding: 1, playsinline: 1, rel: 0, showinfo: 0,
+                        mute: globalSoundEnabled ? 0 : 1, loop: 1, playlist: videoId,
+                        enablejsapi: 1, origin: window.location.origin
+                    },
+                    events: {
+                        onReady: (e) => {
+                            document.getElementById(`loading-${index}`).style.display = 'none';
+                            if (globalSoundEnabled) {
+                                e.target.unMute();
+                                e.target.setVolume(100);
+                            }
+                        },
+                        onStateChange: (e) => {
+                            handlePlayerStateChange(e, index);
+                        },
+                        onError: (e) => {
+                            console.error('Player error:', e);
+                            document.getElementById(`loading-${index}`).style.display = 'none';
+                            document.getElementById(`error-${index}`).style.display = 'block';
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error('Creation error:', err);
+                document.getElementById(`error-${index}`).style.display = 'block';
+            }
+        }
+
+        function handlePlayerStateChange(event, index) {
+            const container = document.querySelector(`[data-index="${index}"]`);
+            const videoId = container.dataset.videoId;
+            
+            if (event.data === YT.PlayerState.PLAYING) {
+                if (!earnedVideos.has(videoId)) {
+                    startEarning(index, videoId);
+                }
+            } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.BUFFERING) {
+                pauseEarning();
+            } else if (event.data === YT.PlayerState.ENDED) {
+                event.target.playVideo();
+                if (!earnedVideos.has(videoId)) {
+                    completeEarning(index);
+                }
+            }
+        }
+
+        function startEarning(index, videoId) {
+            if (earnedVideos.has(videoId)) {
+                hideVideoProgress();
+                return;
+            }
+            
+            if (activeEarningVideoId === videoId && activeEarningTimer) {
+                return;
+            }
+            
+            if (activeEarningTimer) {
+                clearInterval(activeEarningTimer);
+                activeEarningTimer = null;
+            }
+            
+            activeEarningVideoId = videoId;
+            currentVideoMaxEarnings = CONFIG[currentTier].earnPerVideo;
+            currentVideoEarnings = 0;
+            isVideoCompleted = false;
+            
+            if (!videoWatchTime[videoId]) videoWatchTime[videoId] = 0;
+            
+            document.getElementById('videoProgressContainer').classList.add('show');
+            document.getElementById('maxVideoEarning').textContent = currentVideoMaxEarnings;
+            
+            activeEarningTimer = setInterval(() => {
+                const player = players[index];
+                if (!player || !player.getPlayerState) return;
+                
+                if (player.getPlayerState() !== YT.PlayerState.PLAYING) {
+                    return;
+                }
+                
+                videoWatchTime[videoId] += 100;
+                const requiredTime = 60000;
+                const progress = Math.min(videoWatchTime[videoId] / requiredTime, 1);
+                currentVideoEarnings = progress * currentVideoMaxEarnings;
+                
+                updateProgressUI(progress, currentVideoEarnings, currentVideoMaxEarnings);
+                
+                if (progress >= 1) {
+                    completeEarning(index);
+                }
+            }, 100);
+        }
+
+        function pauseEarning() {
+            // Earning pauses automatically because the interval checks PLAYING state
+        }
+
+        function stopEarning() {
+            if (activeEarningTimer) {
+                clearInterval(activeEarningTimer);
+                activeEarningTimer = null;
+                activeEarningVideoId = null;
+            }
+            hideVideoProgress();
+        }
+
+        function completeEarning(index) {
+            const container = document.querySelector(`[data-index="${index}"]`);
+            const videoId = container.dataset.videoId;
+            
+            if (earnedVideos.has(videoId) || isVideoCompleted) return;
+            isVideoCompleted = true;
+            
+            stopEarning();
+            
+            earnedVideos.add(videoId);
+            localStorage.setItem('pinkApp_earnedVideos', JSON.stringify([...earnedVideos]));
+            
+            const reward = CONFIG[currentTier].earnPerVideo;
+            currentCoins += reward;
+            localStorage.setItem('pinkApp_coins', currentCoins);
+            
+            document.getElementById('completedAmount').textContent = reward;
+            document.getElementById('completionCelebration').classList.add('show');
+            updateEarningsDisplay();
+            
+            trackVideoTaskCompletion(videoId);
+            
+            setTimeout(() => {
+                document.getElementById('completionCelebration').classList.remove('show');
+                hideVideoProgress();
+            }, 2000);
+            
+            if (currentCoins >= CONFIG[currentTier].withdrawalThreshold) {
+                setTimeout(() => document.getElementById('thresholdAlert').classList.add('show'), 1000);
+            }
+        }
+
+        // ===== VIDEO TASK TRACKING FOR REWARDS PAGE =====
+        function trackVideoTaskCompletion(videoId) {
+            const today = new Date().toDateString();
+            let dailyCompletions = [];
+            try {
+                const stored = JSON.parse(localStorage.getItem('pinkApp_dailyVideoCompletions') || '{}');
+                dailyCompletions = stored[today] || [];
+            } catch(e) { dailyCompletions = []; }
+            
+            if (!dailyCompletions.includes(videoId)) {
+                dailyCompletions.push(videoId);
+                const stored = JSON.parse(localStorage.getItem('pinkApp_dailyVideoCompletions') || '{}');
+                stored[today] = dailyCompletions;
+                localStorage.setItem('pinkApp_dailyVideoCompletions', JSON.stringify(stored));
+            }
+            console.log(`[Video Task] ${dailyCompletions.length}/3 videos completed today`);
+        }
+
+        // ===== DAILY RESET CHECK =====
+        function cleanupOldDailyCompletions() {
+            const today = new Date().toDateString();
+            try {
+                const stored = JSON.parse(localStorage.getItem('pinkApp_dailyVideoCompletions') || '{}');
+                const cleaned = {};
+                if (stored[today]) cleaned[today] = stored[today];
+                localStorage.setItem('pinkApp_dailyVideoCompletions', JSON.stringify(cleaned));
+            } catch(e) {}
+        }
+
+        // ===== GET TODAY'S VIDEO COUNT (for rewards page to read) =====
+        function getTodayVideoCompletions() {
+            const today = new Date().toDateString();
+            try {
+                const stored = JSON.parse(localStorage.getItem('pinkApp_dailyVideoCompletions') || '{}');
+                return stored[today] || [];
+            } catch(e) { return []; }
+        }
+
+        function updateProgressUI(progress, currentEarn, maxEarn) {
+            document.getElementById('videoProgressFill').style.width = `${progress * 100}%`;
+            document.getElementById('currentVideoEarning').textContent = Math.floor(currentEarn).toLocaleString();
+            document.getElementById('maxVideoEarning').textContent = maxEarn;
+            
+            const seconds = Math.floor(progress * 60);
+            document.getElementById('videoTime').textContent = `0:${seconds.toString().padStart(2, '0')} / 1:00`;
+        }
+
+        function hideVideoProgress() {
+            document.getElementById('videoProgressContainer').classList.remove('show');
+        }
+
+        function stopVideo(index) {
+            stopEarning();
+            if (players[index] && players[index].pauseVideo) {
+                try {
+                    players[index].pauseVideo();
+                    players[index].mute();
+                } catch(e) {}
+            }
+        }
+
+        function cleanupDistantPlayers(currentIdx) {
+            Object.keys(players).forEach(idx => {
+                const i = parseInt(idx);
+                if (Math.abs(i - currentIdx) > 1 && players[i]) {
+                    try {
+                        players[i].destroy();
+                    } catch(e) {}
+                    delete players[i];
+                    const container = document.getElementById(`player-container-${i}`);
+                    if (container) container.innerHTML = '';
+                }
+            });
+        }
+
+        function retryVideo(index) {
+            document.getElementById(`error-${index}`).style.display = 'none';
+            document.getElementById(`loading-${index}`).style.display = 'flex';
+            
+            if (players[index]) {
+                try { players[index].destroy(); } catch(e) {}
+                delete players[index];
+            }
+            
+            const container = document.getElementById(`player-container-${index}`);
+            container.innerHTML = '';
+            
+            const videoId = document.querySelector(`[data-index="${index}"]`).dataset.videoId;
+            setTimeout(() => createPlayer(index, videoId, container), 500);
+        }
+
+        function toggleGlobalSound() {
+            globalSoundEnabled = !globalSoundEnabled;
+            localStorage.setItem('pinkApp_globalSoundEnabled', globalSoundEnabled);
+            
+            document.querySelectorAll('.sound-btn').forEach(btn => {
+                btn.className = `sound-btn ${globalSoundEnabled ? 'unmuted' : 'muted'}`;
+                btn.innerHTML = `<i class="fas fa-${globalSoundEnabled ? 'volume-up' : 'volume-mute'}"></i>`;
+            });
+            
+            const badge = document.getElementById('soundEnabledBadge');
+            badge.classList.toggle('show', globalSoundEnabled);
+            
+            if (players[currentVideoIndex]) {
+                try {
+                    if (globalSoundEnabled) {
+                        players[currentVideoIndex].unMute();
+                        players[currentVideoIndex].setVolume(100);
+                    } else {
+                        players[currentVideoIndex].mute();
+                    }
+                } catch(e) {}
+            }
+            
+            showToast(globalSoundEnabled ? '🔊 Sound enabled' : '🔇 Muted');
+        }
+
+        function updateEarningsDisplay() {
+            document.getElementById('totalEarnings').textContent = currentCoins.toLocaleString('en-NG', {minimumFractionDigits: 2});
+            document.getElementById('alertAmount').textContent = Math.floor(currentCoins).toLocaleString();
+            
+            const progress = Math.min((currentCoins / CONFIG[currentTier].withdrawalThreshold) * 100, 100);
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function updateTierBadge() {
+            document.getElementById('tierBadge').textContent = currentTier.toUpperCase();
+        }
+
+        function toggleLike(btn, index) {
+            const container = document.querySelector(`[data-index="${index}"]`);
+            const videoId = container.dataset.videoId;
+            const isLiked = likedVideos.has(videoId);
+            
+            if (!isLiked) {
+                likedVideos.add(videoId);
+                localStorage.setItem('pinkApp_likedVideos', JSON.stringify([...likedVideos]));
+                btn.classList.add('liked');
+                
+                const reward = CONFIG[currentTier].likeReward;
+                currentCoins += reward;
+                localStorage.setItem('pinkApp_coins', currentCoins);
+                updateEarningsDisplay();
+                showToast(`❤️ Liked! +${reward.toLocaleString()} coin`);
+            } else {
+                likedVideos.delete(videoId);
+                localStorage.setItem('pinkApp_likedVideos', JSON.stringify([...likedVideos]));
+                btn.classList.remove('liked');
+                showToast('💔 Unliked');
+            }
+        }
+
+        function toggleFollow(btn, index) {
+            const followBtn = document.getElementById(`follow-${index}`);
+            const isFollowing = followBtn.classList.contains('following');
+            
+            if (!isFollowing) {
+                followBtn.classList.add('following');
+                followBtn.innerHTML = '<i class="fas fa-check"></i>';
+                const reward = CONFIG[currentTier].followReward;
+                if (reward > 0) {
+                    currentCoins += reward;
+                    localStorage.setItem('pinkApp_coins', currentCoins);
+                    updateEarningsDisplay();
+                    showToast(`Following! +${reward.toLocaleString()} coins`);
+                } else {
+                    showToast('Following!');
+                }
+            } else {
+                followBtn.classList.remove('following');
+                followBtn.innerHTML = '<i class="fas fa-plus"></i>';
+            }
+        }
+
+        function openComments(index) {
+            const container = document.querySelector(`[data-index="${index}"]`);
+            document.getElementById('commentCount').textContent = container.dataset.comments;
+            document.getElementById('commentOverlay').classList.add('show');
+            document.getElementById('commentSection').classList.add('show');
+            
+            const list = document.getElementById('commentsList');
+            list.innerHTML = '';
+            
+            for (let i = 0; i < 20; i++) {
+                const name = `${FIRST_NAMES[(index + i) % FIRST_NAMES.length]} ${LAST_NAMES[(index + i) % LAST_NAMES.length]}`;
+                const username = name.toLowerCase().replace(/\s/g, '') + (i + 100);
+                const comment = COMMENTS[i % COMMENTS.length];
+                const likes = Math.floor(Math.random() * 5000) + 10;
+                const avatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}&backgroundColor=b6e3f4,c0aede`;
+                
+                list.innerHTML += `
+                    <div class="comment">
+                        <div class="comment-avatar"><img src="${avatar}" alt="${username}"></div>
+                        <div class="comment-content">
+                            <div class="comment-username">${username}${i % 5 === 0 ? '<i class="fas fa-check-circle verified-badge"></i>' : ''}</div>
+                            <div class="comment-text">${comment}</div>
+                            <div class="comment-actions"><span>${Math.floor(Math.random() * 23 + 1)}h</span><span>Reply</span><span><i class="fas fa-heart"></i> ${likes > 1000 ? (likes/1000).toFixed(1) + 'K' : likes}</span></div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function closeComments() {
+            document.getElementById('commentOverlay').classList.remove('show');
+            document.getElementById('commentSection').classList.remove('show');
+        }
+
+        function postComment() {
+            const input = document.getElementById('commentInput');
+            if (!input.value.trim()) return;
+            
+            const reward = CONFIG[currentTier].commentReward;
+            currentCoins += reward;
+            localStorage.setItem('pinkApp_coins', currentCoins);
+            updateEarningsDisplay();
+            
+            const list = document.getElementById('commentsList');
+            const newComment = document.createElement('div');
+            newComment.className = 'comment';
+            newComment.innerHTML = `
+                <div class="comment-avatar"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=You" alt="You"></div>
+                <div class="comment-content">
+                    <div class="comment-username">You</div>
+                    <div class="comment-text">${input.value}</div>
+                    <div class="comment-actions"><span>Just now</span><span>Reply</span><span><i class="fas fa-heart"></i> 0</span></div>
+                </div>
+            `;
+            list.insertBefore(newComment, list.firstChild);
+            input.value = '';
+            showToast(`💬 Posted! +${reward.toLocaleString()} coin`);
+        }
+
+        function openShare(index) {
+            const container = document.querySelector(`[data-index="${index}"]`);
+            currentShareVideoId = container.dataset.videoId;
+            document.getElementById('shareOverlay').classList.add('show');
+            document.getElementById('shareModal').classList.add('show');
+        }
+
+        function closeShare() {
+            document.getElementById('shareOverlay').classList.remove('show');
+            document.getElementById('shareModal').classList.remove('show');
+        }
+
+        let currentShareVideoId = '';
+        
+        function shareTo(platform) {
+            const url = `https://youtube.com/watch?v=${currentShareVideoId}`;
+            const text = 'Watch videos and earn coins on Pink App!';
+            
+            switch(platform) {
+                case 'whatsapp': window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`, '_blank'); break;
+                case 'facebook': window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank'); break;
+                case 'twitter': window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank'); break;
+                case 'copy': 
+                    navigator.clipboard.writeText(url).then(() => showToast('Link copied!')).catch(() => showToast('Link copied!'));
+                    break;
+            }
+            closeShare();
+        }
+
+        function withdrawEarnings() {
+            showToast('💰 Processing cash out...');
+            setTimeout(() => navigateWithLoader('pink-withdraw.html'), 1000);
+        }
+
+        function closeThreshold() {
+            document.getElementById('thresholdAlert').classList.remove('show');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && document.getElementById('commentSection').classList.contains('show')) {
+                postComment();
+            }
+        });
+
+        setInterval(() => {
+
+            const currentUser = firebase.auth().currentUser;
+
+            if (!currentUser) return;
+
+            db.collection('config').doc('earnControl').get().then((doc) => {
+
+                if (doc.exists && doc.data().globalLocked === true) {
+
+                    showLockOverlay(
+                        doc.data().lockMessage ||
+                        'Earn section is temporarily unavailable.'
+                    );
+                }
+            });
+
+        }, 30000);
+    </script>
+</body>
+</html>

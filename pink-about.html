@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0a0a0f">
+    <title>About Pink App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pink-primary: #fe2c55;
+            --pink-secondary: #ff6b8a;
+            --pink-glow: rgba(254, 44, 85, 0.4);
+            --bg-dark: #0a0a0f;
+            --bg-darker: #050508;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-hover: rgba(255, 255, 255, 0.06);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.5);
+            --text-muted: rgba(255, 255, 255, 0.3);
+            --gold: #ffd700;
+            --cyan: #25f4ee;
+            --success: #00d26a;
+            --error: #ff4757;
+            --warning: #ffa502;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .ambient-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+        }
+
+        .orb-1 {
+            width: 300px;
+            height: 300px;
+            background: var(--pink-primary);
+            top: -120px;
+            right: -100px;
+            opacity: 0.3;
+        }
+
+        .orb-2 {
+            width: 250px;
+            height: 250px;
+            background: var(--cyan);
+            bottom: 10%;
+            left: -100px;
+            opacity: 0.15;
+        }
+
+        .grain {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+
+        .app-container {
+            position: relative;
+            z-index: 2;
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            padding-bottom: 100px;
+        }
+
+        /* Header */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+
+        .back-btn:active {
+            background: var(--glass-hover);
+        }
+
+        .header-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        /* Hero */
+        .hero {
+            padding: 2rem 1.5rem;
+            text-align: center;
+        }
+
+        .hero-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--pink-primary), var(--pink-secondary));
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 0 40px rgba(254, 44, 85, 0.3);
+            font-size: 2rem;
+            font-weight: 900;
+            color: white;
+        }
+
+        .hero-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #fff, var(--pink-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* Section */
+        .section {
+            padding: 0 1.5rem 1.5rem;
+        }
+
+        .section-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .section-header {
+            padding: 1.25rem 1.25rem 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .section-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .section-icon.pink { background: rgba(254, 44, 85, 0.1); color: var(--pink-primary); }
+        .section-icon.gold { background: rgba(255, 215, 0, 0.1); color: var(--gold); }
+        .section-icon.cyan { background: rgba(37, 244, 238, 0.1); color: var(--cyan); }
+        .section-icon.green { background: rgba(0, 210, 106, 0.1); color: var(--success); }
+        .section-icon.purple { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .section-body {
+            padding: 0 1.25rem 1.25rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .section-body p {
+            margin-bottom: 0.75rem;
+        }
+
+        .section-body p:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-body strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* Requirement List */
+        .req-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .req-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .req-list li:last-child {
+            border-bottom: none;
+        }
+
+        .req-check {
+            width: 20px;
+            height: 20px;
+            background: rgba(0, 210, 106, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .req-check svg {
+            width: 12px;
+            height: 12px;
+            color: var(--success);
+        }
+
+        .req-text {
+            flex: 1;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        /* Step Cards */
+        .step-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .step-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 14px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--pink-primary), var(--pink-secondary));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .step-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Coin Rate */
+        .rate-banner {
+            background: linear-gradient(135deg, rgba(254, 44, 85, 0.1), rgba(37, 244, 238, 0.05));
+            border: 1px solid rgba(254, 44, 85, 0.2);
+            border-radius: 16px;
+            padding: 1.25rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .rate-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .rate-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--pink-primary);
+        }
+
+        .rate-note {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        /* FAQ Accordion */
+        .faq-item {
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+
+        .faq-question {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.25rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .faq-question:active {
+            background: var(--glass-hover);
+        }
+
+        .faq-question-text {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            padding-right: 1rem;
+        }
+
+        .faq-chevron {
+            color: var(--text-muted);
+            transition: transform 0.3s;
+            flex-shrink: 0;
+        }
+
+        .faq-chevron.active {
+            transform: rotate(180deg);
+        }
+
+        .faq-chevron svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .faq-answer.open {
+            max-height: 200px;
+        }
+
+        .faq-answer-text {
+            padding: 0 1.25rem 1rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-width: 480px;
+            margin: 0 auto;
+            height: 70px;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(30px);
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.65rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            padding: 0.5rem;
+        }
+
+        .nav-item svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .nav-item.active {
+            color: var(--pink-primary);
+        }
+
+        /* Spinner Overlay */
+        .spinner-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 3000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+
+        .spinner-overlay.active {
+            display: flex;
+        }
+
+        .spinner-ring {
+            width: 56px;
+            height: 56px;
+            position: relative;
+        }
+
+        .spinner-ring::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: var(--pink-primary);
+            border-right-color: var(--pink-secondary);
+            animation: spin 1s linear infinite;
+        }
+
+        .spinner-ring::after {
+            content: '';
+            position: absolute;
+            inset: 8px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-bottom-color: var(--cyan);
+            border-left-color: var(--gold);
+            animation: spin 1.5s linear infinite reverse;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Version Footer */
+        .version-footer {
+            text-align: center;
+            padding: 2rem 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+    <div class="grain"></div>
+
+    <div class="app-container">
+        <header class="header">
+            <a href="pink-profile.html" class="back-btn" onclick="navigateTo('pink-profile.html'); return false;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"/>
+                </svg>
+            </a>
+            <div class="header-title">About Pink App</div>
+            <div style="width:40px;"></div>
+        </header>
+
+        <!-- Hero -->
+        <div class="hero">
+            <div class="hero-logo">P</div>
+            <div class="hero-title">Pink App</div>
+            <div class="hero-subtitle">Africa's premier social earning platform. Watch, earn, and withdraw real cash — all from your phone.</div>
+        </div>
+
+        <!-- What is Pink App -->
+        <div class="section">
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-icon pink">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="16" x2="12" y2="12"/>
+                            <line x1="12" y1="8" x2="12.01" y2="8"/>
+                        </svg>
+                    </div>
+                    <div class="section-title">What is Pink App?</div>
+                </div>
+                <div class="section-body">
+                    <p>Pink App is a <strong>social earning platform</strong> built for Africans. We partner with content creators and advertisers to bring you curated video content, surveys, and daily tasks.</p>
+                    <p>Every video you watch, every survey you complete, and every friend you refer earns you <strong>coins</strong> that convert directly to real cash in your local currency.</p>
+                    <p>Founded in 2024, Pink App has already paid out millions to thousands of users across Nigeria, Ghana, Kenya, South Africa, and 50+ African countries.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Requirements -->
+        <div class="section">
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-icon purple">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                            <polyline points="10 9 9 9 8 9"/>
+                        </svg>
+                    </div>
+                    <div class="section-title">Requirements</div>
+                </div>
+                <div class="section-body">
+                    <ul class="req-list">
+                        <li>
+                            <div class="req-check">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                            </div>
+                            <div class="req-text">Valid email address for account verification</div>
+                        </li>
+                        <li>
+                            <div class="req-check">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                            </div>
+                            <div class="req-text">Active phone number from a supported African country</div>
+                        </li>
+                        <li>
+                            <div class="req-check">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                            </div>
+                            <div class="req-text">Bank account or mobile money wallet for withdrawals</div>
+                        </li>
+                        <li>
+                            <div class="req-check">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                            </div>
+                            <div class="req-text">Minimum age of 18 years</div>
+                        </li>
+                        <li>
+                            <div class="req-check">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                            </div>
+                            <div class="req-text">Stable internet connection for video streaming</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coin Rate -->
+        <div class="section">
+            <div class="rate-banner">
+                <div class="rate-label">Current Exchange Rate</div>
+                <div class="rate-value">1 Coin = ₦50</div>
+                <div class="rate-note">Rates vary by country. Updated in real-time based on market conditions.</div>
+            </div>
+        </div>
+
+        <!-- How to Earn -->
+        <div class="section">
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-icon gold">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 12 20 22 4 22 4 12"/>
+                            <rect x="2" y="7" width="20" height="5"/>
+                            <line x1="12" y1="22" x2="12" y2="7"/>
+                            <path d="M12 7V3l-4 4 4-4 4 4-4-4z"/>
+                        </svg>
+                    </div>
+                    <div class="section-title">How to Earn</div>
+                </div>
+                <div class="section-body">
+                    <div class="step-list">
+                        <div class="step-card">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <div class="step-title">Watch Videos</div>
+                                <div class="step-desc">Watch curated video content from creators and advertisers. Earn 5-50 coins per video depending on length and engagement.</div>
+                            </div>
+                        </div>
+                        <div class="step-card">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <div class="step-title">Complete Surveys</div>
+                                <div class="step-desc">Answer quick surveys and polls. Earn 20-200 coins per completed survey based on complexity.</div>
+                            </div>
+                        </div>
+                        <div class="step-card">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <div class="step-title">Daily Check-In</div>
+                                <div class="step-desc">Claim your daily reward every 24 hours. Streaks multiply your bonus up to 5x after 7 consecutive days.</div>
+                            </div>
+                        </div>
+                        <div class="step-card">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <div class="step-title">Refer Friends</div>
+                                <div class="step-desc">Share your referral code. Earn 500 coins for every friend who signs up and completes their first task.</div>
+                            </div>
+                        </div>
+                        <div class="step-card">
+                            <div class="step-number">5</div>
+                            <div class="step-content">
+                                <div class="step-title">Level Up</div>
+                                <div class="step-desc">Earn XP from every activity. Higher tiers unlock bonus multipliers, priority withdrawals, and exclusive tasks.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- How to Withdraw -->
+        <div class="section">
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-icon cyan">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="1" x2="12" y2="23"/>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                        </svg>
+                    </div>
+                    <div class="section-title">How to Withdraw</div>
+                </div>
+                <div class="section-body">
+                    <div class="step-list">
+                        <div class="step-card">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <div class="step-title">Reach Minimum Balance</div>
+                                <div class="step-desc">Accumulate at least 1,000 coins (₦5,000 or equivalent) in your withdrawable balance to request a payout.</div>
+                            </div>
+                        </div>
+                        <div class="step-card">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <div class="step-title">Link Your Bank</div>
+                                <div class="step-desc">Go to your dashboard and add your bank account or mobile money wallet details under "Withdraw".</div>
+                            </div>
+                        </div>
+                        <div class="step-card">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <div class="step-title">Request Withdrawal</div>
+                                <div class="step-desc">Enter the amount you want to withdraw and confirm. Withdrawals are processed within 24-72 hours.</div>
+                            </div>
+                        </div>
+                        <div class="step-card">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <div class="step-title">Get Paid</div>
+                                <div class="step-desc">Funds are sent directly to your linked bank account. You'll receive a confirmation email once processed.</div>
+                            </div>
+                        </div>

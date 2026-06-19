@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0a0a0f">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <title>Help Center - Pink App</title>
+    <style>
+        :root {
+            --pink-primary: #fe2c55;
+            --pink-secondary: #ff6b8a;
+            --pink-glow: rgba(254, 44, 85, 0.4);
+            --bg-dark: #0a0a0f;
+            --bg-darker: #050508;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-hover: rgba(255, 255, 255, 0.06);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.5);
+            --text-muted: rgba(255, 255, 255, 0.3);
+            --gold: #ffd700;
+            --cyan: #25f4ee;
+            --success: #00d26a;
+            --error: #ff4757;
+            --warning: #ffa502;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Outfit', sans-serif; }
+        body { background: var(--bg-dark); color: var(--text-primary); min-height: 100vh; overflow-x: hidden; position: relative; }
+        .ambient-bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.4; }
+        .orb-1 { width: 280px; height: 280px; background: var(--pink-primary); top: -100px; right: -100px; }
+        .orb-2 { width: 220px; height: 220px; background: var(--cyan); bottom: 20%; left: -80px; opacity: 0.2; }
+        .grain { position: fixed; inset: 0; z-index: 1; opacity: 0.03; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E"); pointer-events: none; }
+        .app-container { position: relative; z-index: 2; max-width: 480px; margin: 0 auto; min-height: 100vh; padding-bottom: 2rem; }
+        .header { position: sticky; top: 0; z-index: 100; background: rgba(10, 10, 15, 0.95); backdrop-filter: blur(20px); padding: 1rem 1.5rem; display: flex; align-items: center; gap: 1rem; border-bottom: 1px solid var(--glass-border); }
+        .back-btn { width: 40px; height: 40px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--text-primary); cursor: pointer; transition: all 0.3s; text-decoration: none; flex-shrink: 0; }
+        .back-btn:active { background: var(--glass-hover); }
+        .header-title { font-size: 1.1rem; font-weight: 700; }
+        .page-content { padding: 1.5rem; }
+        .section-label { font-size: 0.75rem; font-weight: 600; color: var(--pink-secondary); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 0.75rem; padding-left: 0.25rem; }
+        .settings-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 20px; overflow: hidden; margin-bottom: 1rem; }
+        .settings-item { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem; border-bottom: 1px solid var(--glass-border); cursor: pointer; transition: all 0.3s; text-decoration: none; color: inherit; }
+        .settings-item:last-child { border-bottom: none; }
+        .settings-item:active { background: var(--glass-hover); }
+        .settings-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .settings-icon svg { width: 20px; height: 20px; }
+        .settings-icon.pink { background: rgba(254, 44, 85, 0.1); color: var(--pink-primary); }
+        .settings-icon.cyan { background: rgba(37, 244, 238, 0.1); color: var(--cyan); }
+        .settings-icon.gold { background: rgba(255, 215, 0, 0.1); color: var(--gold); }
+        .settings-icon.purple { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
+        .settings-icon.green { background: rgba(0, 210, 106, 0.1); color: var(--success); }
+        .settings-icon.red { background: rgba(255, 71, 87, 0.1); color: var(--error); }
+        .settings-icon.blue { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+        .settings-icon.orange { background: rgba(249, 115, 22, 0.1); color: #f97316; }
+        .settings-content { flex: 1; }
+        .settings-label { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.15rem; }
+        .settings-desc { font-size: 0.75rem; color: var(--text-muted); }
+        .settings-arrow { color: var(--text-muted); font-size: 0.8rem; }
+        .toggle-switch { width: 50px; height: 28px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 14px; position: relative; cursor: pointer; transition: all 0.3s; flex-shrink: 0; }
+        .toggle-switch.active { background: linear-gradient(135deg, var(--pink-primary), var(--pink-secondary)); border-color: transparent; }
+        .toggle-knob { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; background: white; border-radius: 50%; transition: transform 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .toggle-switch.active .toggle-knob { transform: translateX(22px); }
+        .input-group { padding: 1rem 1.25rem; border-bottom: 1px solid var(--glass-border); }
+        .input-group:last-child { border-bottom: none; }
+        .input-label { font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem; display: block; }
+        .input-field { width: 100%; padding: 0.875rem 1rem; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 12px; color: var(--text-primary); font-size: 0.9rem; font-family: 'Outfit', sans-serif; outline: none; transition: all 0.3s; }
+        .input-field:focus { border-color: var(--pink-primary); box-shadow: 0 0 0 3px rgba(254, 44, 85, 0.1); }
+        .input-field::placeholder { color: var(--text-muted); }
+        .input-field:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-primary { width: 100%; padding: 1rem; background: linear-gradient(135deg, var(--pink-primary), var(--pink-secondary)); border: none; border-radius: 14px; color: white; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: all 0.3s; margin-top: 1rem; }
+        .btn-primary:active { transform: scale(0.97); opacity: 0.9; }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-secondary { width: 100%; padding: 1rem; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 14px; color: var(--text-primary); font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.3s; margin-top: 0.75rem; }
+        .btn-secondary:active { background: var(--glass-hover); }
+        .btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .info-text { font-size: 0.8rem; color: var(--text-muted); line-height: 1.6; margin-top: 1rem; }
+        .faq-item { padding: 1rem 1.25rem; border-bottom: 1px solid var(--glass-border); cursor: pointer; }
+        .faq-item:last-child { border-bottom: none; }
+        .faq-question { font-size: 0.9rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+        .faq-answer { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.6; margin-top: 0.5rem; max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+        .faq-item.open .faq-answer { max-height: 300px; }
+        .faq-item.open .faq-question svg { transform: rotate(180deg); }
+        .spinner-overlay { position: fixed; inset: 0; background: rgba(10, 10, 15, 0.95); backdrop-filter: blur(10px); z-index: 3000; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; }
+        .spinner-overlay.active { display: flex; }
+        .spinner-ring { width: 56px; height: 56px; position: relative; }
+        .spinner-ring::before { content: ''; position: absolute; inset: 0; border-radius: 50%; border: 3px solid transparent; border-top-color: var(--pink-primary); border-right-color: var(--pink-secondary); animation: spin 1s linear infinite; }
+        .spinner-ring::after { content: ''; position: absolute; inset: 8px; border-radius: 50%; border: 3px solid transparent; border-bottom-color: var(--cyan); border-left-color: var(--gold); animation: spin 1.5s linear infinite reverse; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .toast { position: fixed; top: 1.5rem; left: 50%; transform: translateX(-50%) translateY(-100px); background: rgba(0, 210, 106, 0.9); backdrop-filter: blur(10px); color: white; padding: 0.875rem 1.5rem; border-radius: 12px; font-size: 0.9rem; font-weight: 500; z-index: 4000; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); white-space: nowrap; }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast.error { background: rgba(255, 71, 87, 0.9); }
+        .status-badge { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.25rem 0.6rem; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+        .status-badge.enabled { background: rgba(0, 210, 106, 0.15); color: var(--success); }
+        .status-badge.disabled { background: rgba(255, 71, 87, 0.15); color: var(--error); }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); z-index: 5000; display: none; align-items: center; justify-content: center; padding: 1.5rem; }
+        .modal-overlay.active { display: flex; }
+        .modal-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 24px; padding: 2rem; width: 100%; max-width: 340px; text-align: center; backdrop-filter: blur(20px); }
+        .modal-icon { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
+        .modal-icon svg { width: 28px; height: 28px; color: white; }
+        .modal-icon.warning { background: linear-gradient(135deg, var(--warning), #f59e0b); box-shadow: 0 10px 30px rgba(255, 165, 0, 0.3); }
+        .modal-icon.danger { background: linear-gradient(135deg, var(--error), #dc2626); box-shadow: 0 10px 30px rgba(255, 71, 87, 0.3); }
+        .modal-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .modal-text { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.5; }
+        .modal-buttons { display: flex; flex-direction: column; gap: 0.75rem; }
+        .modal-btn { width: 100%; padding: 0.875rem; border-radius: 14px; border: none; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .modal-btn.primary { background: linear-gradient(135deg, var(--pink-primary), var(--pink-secondary)); color: white; }
+        .modal-btn.primary:active { transform: scale(0.97); }
+        .modal-btn.danger { background: linear-gradient(135deg, var(--error), #dc2626); color: white; }
+        .modal-btn.danger:active { transform: scale(0.97); }
+        .modal-btn.secondary { background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-primary); }
+        .modal-btn.secondary:active { background: var(--glass-hover); }
+        .danger-zone { padding: 0 1.5rem; margin-top: 1rem; }
+        .danger-btn { width: 100%; padding: 1rem; background: linear-gradient(135deg, rgba(255, 71, 87, 0.1), rgba(220, 38, 38, 0.05)); border: 1px solid rgba(255, 71, 87, 0.2); border-radius: 16px; color: var(--error); font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        .danger-btn svg { width: 18px; height: 18px; }
+        .danger-btn:active { transform: scale(0.97); background: linear-gradient(135deg, rgba(255, 71, 87, 0.2), rgba(220, 38, 38, 0.1)); }
+        .app-version { text-align: center; padding: 2rem 1.5rem; color: var(--text-muted); font-size: 0.8rem; }
+        .app-version span { color: var(--pink-secondary); font-weight: 600; }
+        .terms-content-page { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.8; padding: 0 1.5rem; }
+        .terms-content-page h3 { color: var(--text-primary); font-size: 1rem; font-weight: 700; margin: 1.5rem 0 0.5rem; }
+        .terms-content-page p { margin-bottom: 0.75rem; }
+        .terms-content-page ul { margin-left: 1.25rem; margin-bottom: 0.75rem; }
+        .terms-content-page li { margin-bottom: 0.35rem; }
+        .last-updated { font-size: 0.75rem; color: var(--text-muted); padding: 0 1.5rem 1rem; }
+        .pin-dots { display: flex; gap: 0.75rem; justify-content: center; margin: 1.5rem 0; }
+        .pin-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--glass-border); transition: all 0.3s; }
+        .pin-dot.filled { background: var(--pink-primary); border-color: var(--pink-primary); }
+        .pin-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; padding: 0 2rem; }
+        .pin-key { aspect-ratio: 1; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: 600; color: var(--text-primary); cursor: pointer; transition: all 0.2s; }
+        .pin-key:active { background: var(--glass-hover); transform: scale(0.95); }
+        .pin-key.delete { font-size: 0.8rem; color: var(--text-muted); }
+        .strength-bar { height: 4px; background: var(--glass-bg); border-radius: 2px; margin-top: 0.5rem; overflow: hidden; }
+        .strength-fill { height: 100%; border-radius: 2px; transition: all 0.3s; width: 0; }
+        .strength-fill.weak { width: 33%; background: var(--error); }
+        .strength-fill.medium { width: 66%; background: var(--warning); }
+        .strength-fill.strong { width: 100%; background: var(--success); }
+        .strength-text { font-size: 0.7rem; margin-top: 0.25rem; text-align: right; }
+        .chat-area { padding: 1rem 1.5rem; padding-bottom: 100px; }
+        .chat-bubble { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1rem 1.25rem; margin-bottom: 0.75rem; max-width: 85%; }
+        .chat-bubble.agent { border-left: 3px solid var(--pink-primary); margin-right: auto; }
+        .chat-bubble.user { border-right: 3px solid var(--cyan); margin-left: auto; text-align: right; }
+        .chat-bubble p { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; }
+        .chat-time { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.35rem; }
+        .chat-input-bar { position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto; background: rgba(10, 10, 15, 0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--glass-border); padding: 0.75rem 1.5rem; display: flex; gap: 0.75rem; align-items: center; z-index: 100; }
+        .chat-input { flex: 1; padding: 0.75rem 1rem; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 12px; color: var(--text-primary); font-size: 0.9rem; font-family: 'Outfit', sans-serif; outline: none; }
+        .chat-input:focus { border-color: var(--pink-primary); }
+        .chat-input::placeholder { color: var(--text-muted); }
+        .chat-send { width: 44px; height: 44px; background: linear-gradient(135deg, var(--pink-primary), var(--pink-secondary)); border: none; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; flex-shrink: 0; transition: all 0.2s; }
+        .chat-send:active { transform: scale(0.95); opacity: 0.8; }
+        .quick-actions { display: flex; gap: 0.5rem; padding: 0 1.5rem 0.75rem; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .quick-chip { padding: 0.5rem 1rem; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 20px; color: var(--text-secondary); font-size: 0.75rem; font-weight: 500; white-space: nowrap; cursor: pointer; transition: all 0.3s; }
+        .quick-chip:active { background: var(--glass-hover); color: var(--pink-primary); border-color: var(--pink-primary); }
+        .search-bar { padding: 0 1.5rem 1rem; }
+        .search-wrap { position: relative; }
+        .search-wrap svg { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); width: 18px; height: 18px; }
+        .search-input { width: 100%; padding: 0.875rem 1rem 0.875rem 2.75rem; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 14px; color: var(--text-primary); font-size: 0.9rem; font-family: 'Outfit', sans-serif; outline: none; transition: all 0.3s; }
+        .search-input:focus { border-color: var(--pink-primary); box-shadow: 0 0 0 3px rgba(254, 44, 85, 0.1); }
+        .search-input::placeholder { color: var(--text-muted); }
+        .category-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; padding: 0 1.5rem 1rem; }
+        .category-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.25rem; text-align: center; cursor: pointer; transition: all 0.3s; }
+        .category-card:active { background: var(--glass-hover); transform: scale(0.97); }
+        .category-card svg { width: 28px; height: 28px; margin-bottom: 0.5rem; }
+        .category-card.pink { color: var(--pink-primary); }
+        .category-card.cyan { color: var(--cyan); }
+        .category-card.gold { color: var(--gold); }
+        .category-card.green { color: var(--success); }
+        .category-name { font-size: 0.8rem; font-weight: 600; color: var(--text-primary); }
+        .bank-card { background: linear-gradient(135deg, rgba(254, 44, 85, 0.15), rgba(37, 244, 238, 0.08)); border: 1px solid var(--glass-border); border-radius: 20px; padding: 1.5rem; margin-bottom: 1rem; position: relative; overflow: hidden; }
+        .bank-card::before { content: ''; position: absolute; top: -50%; right: -30%; width: 200px; height: 200px; background: radial-gradient(circle, rgba(254, 44, 85, 0.1), transparent 70%); border-radius: 50%; }
+        .bank-name { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
+        .bank-number { font-size: 1.4rem; font-weight: 700; letter-spacing: 3px; margin-bottom: 0.5rem; font-family: 'Courier New', monospace; }
+        .bank-holder { font-size: 0.85rem; color: var(--text-secondary); }
+        .bank-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+        .bank-action-btn { padding: 0.5rem 1rem; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 10px; color: var(--text-primary); font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .bank-action-btn:active { background: var(--glass-hover); }
+        .add-card-btn { width: 100%; padding: 1.25rem; background: var(--glass-bg); border: 2px dashed var(--glass-border); border-radius: 16px; color: var(--text-muted); font-size: 0.9rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.3s; }
+        .add-card-btn:active { border-color: var(--pink-primary); color: var(--pink-primary); }
+        .loading-skeleton { background: linear-gradient(90deg, var(--glass-bg) 25%, rgba(255,255,255,0.05) 50%, var(--glass-bg) 75%); background-size: 200% 100%; animation: skeleton 1.5s infinite; border-radius: 8px; }
+        @keyframes skeleton { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .empty-state { text-align: center; padding: 3rem 1.5rem; color: var(--text-muted); }
+        .empty-state svg { width: 48px; height: 48px; margin-bottom: 1rem; opacity: 0.5; }
+        .session-row { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem; border-bottom: 1px solid var(--glass-border); }
+        .session-row:last-child { border-bottom: none; }
+        .session-info { flex: 1; }
+        .session-device { font-size: 0.9rem; font-weight: 600; }
+        .session-location { font-size: 0.75rem; color: var(--text-muted); }
+
+    </style>
+</head>
+<body>
+    <div class="ambient-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+    <div class="grain"></div>
+    <div class="app-container">
+
+        <header class="header">
+            <a href="pink-settings.html" class="back-btn" onclick="navigateTo('pink-settings.html'); return false;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            </a>
+            <div class="header-title">Help Center</div>
+        </header>
+
+        <div class="page-content" style="padding-top:0.5rem">
+            <div class="search-bar">
+                <div class="search-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input type="text" class="search-input" placeholder="Search FAQs, guides..." id="searchInput" oninput="filterFaqs()">
+                </div>
+            </div>
+
+            <div class="section-label">Categories</div>
+            <div class="category-grid">
+                <div class="category-card pink" onclick="filterByCategory('getting-started')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                    <div class="category-name">Getting Started</div>
+                </div>
+                <div class="category-card cyan" onclick="filterByCategory('earnings')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
+                    </svg>
+                    <div class="category-name">Earnings</div>
+                </div>
+                <div class="category-card gold" onclick="filterByCategory('withdrawals')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+                    </svg>
+                    <div class="category-name">Withdrawals</div>
+                </div>
+                <div class="category-card green" onclick="filterByCategory('account')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    <div class="category-name">Account</div>
+                </div>
+            </div>
+
+            <div class="section-label">Frequently Asked Questions</div>
+            <div class="settings-card" id="faqContainer">
+                <div class="faq-item" data-category="earnings" onclick="this.classList.toggle('open')">
+                    <div class="faq-question">
+                        How do I earn coins?
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.3s"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <div class="faq-answer">You can earn coins by watching videos, completing daily surveys, referring friends, and claiming daily rewards. Each activity gives a different amount of coins. Video watching gives 5-50 coins per video, surveys give 100-500 coins, and referrals give you 10% of your friend's earnings.</div>
+                </div>
+                <div class="faq-item" data-category="withdrawals" onclick="this.classList.toggle('open')">
+                    <div class="faq-question">
+                        How do I withdraw my earnings?
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.3s"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <div class="faq-answer">Go to your dashboard and tap "Withdraw". You need a minimum balance of 5,000 coins and a verified bank account. Withdrawals are processed within 24-48 hours. Make sure your bank details are correct to avoid delays.</div>
+                </div>
+                <div class="faq-item" data-category="withdrawals" onclick="this.classList.toggle('open')">
+                    <div class="faq-question">
+                        What is the minimum withdrawal amount?
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.3s"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <div class="faq-answer">The minimum withdrawal is 5,000 coins (equivalent to 2,500 Naira for Nigerian users). This amount varies by country based on local conversion rates. Check your dashboard for your country's specific rate.</div>
+                </div>
+                <div class="faq-item" data-category="earnings" onclick="this.classList.toggle('open')">
+                    <div class="faq-question">
+                        How does the referral system work?
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.3s"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <div class="faq-answer">Share your referral code or link with friends. When they sign up and start earning, you get a 10% bonus on their earnings for life. The more they earn, the more you earn. You can find your referral code in the Referral section of your dashboard.</div>
+                </div>
+                <div class="faq-item" data-category="withdrawals" onclick="this.classList.toggle('open')">
+                    <div class="faq-question">
+                        Why was my withdrawal rejected?
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.3s"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <div class="faq-answer">Withdrawals may be rejected if your account is not verified, you haven't met the minimum threshold, your bank details are incorrect, or there are suspicious activities detected. Contact support for help resolving the issue.</div>
+                </div>
+                <div class="faq-item" data-category="account" onclick="this.classList.toggle('open')">
+                    <div class="faq-question">
+                        Can I use Pink App outside Africa?
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.3s"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <div class="faq-answer">Pink App is currently available for users in African countries only. We are working to expand to other regions soon. Your account will be locked if accessed from outside supported countries.</div>
+                </div>
+                <div class="faq-item" data-category="getting-started" onclick="this.classList.toggle('open')">
+                    <div class="faq-question">
+                        How do I verify my account?
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.3s"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <div class="faq-answer">After signing up, check your email for a verification link. Click it to verify your account. You can also resend the verification email from your profile page. Verified accounts have higher withdrawal limits.</div>
+                </div>
+                <div class="faq-item" data-category="account" onclick="this.classList.toggle('open')">
+                    <div class="faq-question">
+                        How do I change my country?
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.3s"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <div class="faq-answer">Go to Profile > Edit Profile to change your country. Note that changing your country will update your coin conversion rate. You can only change your country once every 30 days.</div>
+                </div>
+                <div class="faq-item" data-category="earnings" onclick="this.classList.toggle('open')">
+                    <div class="faq-question">
+                        What is the daily reward streak?
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.3s"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <div class="faq-answer">The daily reward streak gives you bonus coins for consecutive daily check-ins. Day 1 = 10 coins, Day 2 = 20 coins, up to Day 7 = 100 coins. If you miss a day, the streak resets to Day 1. Keep your streak alive for maximum rewards!</div>
+                </div>
+                <div class="faq-item" data-category="getting-started" onclick="this.classList.toggle('open')">
+                    <div class="faq-question">
+                        Is Pink App free to use?
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.3s"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <div class="faq-answer">Yes! Pink App is completely free to download and use. You never need to pay anything to earn coins. We make money from advertisers, and we share that revenue with you.</div>
+                </div>
+            </div>
+
+            <div class="section-label">Still Need Help?</div>
+            <div class="settings-card">
+                <a class="settings-item" href="pink-support.html" onclick="navigateTo('pink-support.html'); return false;">
+                    <div class="settings-icon green">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                        </svg>
+                    </div>
+                    <div class="settings-content">
+                        <div class="settings-label">Contact Support</div>
+                        <div class="settings-desc">Chat with our team directly</div>
+                    </div>
+                    <span class="settings-arrow">›</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="spinner-overlay" id="spinnerOverlay">
+        <div class="spinner-ring"></div>
+        <div style="color:var(--text-secondary);font-size:0.9rem;letter-spacing:1px;">Loading...</div>
+    </div>
+    <div class="toast" id="toast"></div>
+
+    <script>
+        function navigateTo(url) {
+            const overlay = document.getElementById('spinnerOverlay');
+            if(overlay) overlay.classList.add('active');
+            setTimeout(() => { window.location.href = url; }, 800);
+        }
+        function showToast(message, isSuccess) {
+            const toast = document.getElementById('toast');
+            if(!toast) return;
+            toast.textContent = message;
+            toast.style.background = isSuccess ? 'rgba(0, 210, 106, 0.9)' : 'rgba(255, 71, 87, 0.9)';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+        function showError(msg) { showToast(msg, false); }
+        function showSuccess(msg) { showToast(msg, true); }
+    </script>
+
+</body>
+</html>
+<script>
+    function filterFaqs() {
+        const query = document.getElementById('searchInput').value.toLowerCase().trim();
+        const items = document.querySelectorAll('.faq-item');
+        items.forEach(item => {
+            const text = item.textContent.toLowerCase();
+            item.style.display = text.includes(query) ? '' : 'none';
+        });
+    }
+
+    function filterByCategory(cat) {
+        const items = document.querySelectorAll('.faq-item');
+        items.forEach(item => {
+            item.style.display = item.dataset.category === cat ? '' : 'none';
+        });
+        document.getElementById('searchInput').value = '';
+        showSuccess('Showing ' + cat.replace('-', ' ') + ' FAQs');
+    }
+</script>

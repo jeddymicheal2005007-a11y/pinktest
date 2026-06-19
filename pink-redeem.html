@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Redeem Coins — Pink App</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --pink: #fe2c55; --pink-mid: #e8254c; --pink-glow: rgba(254,44,85,0.25);
+            --cyan: #25f4ee; --cyan-glow: rgba(37,244,238,0.15);
+            --gold: #f5c542; --gold-glow: rgba(245,197,66,0.15);
+            --bg: #08080d; --surface: #0f0f18; --surface2: #141421;
+            --surface3: #1a1a2a; --border: rgba(255,255,255,0.06);
+            --border-bright: rgba(255,255,255,0.12);
+            --text: #f0f0f5; --text-dim: #72728a; --text-mid: #a8a8c0;
+            --success: #00d68f; --danger: #ff3d5a; --warning: #f5c542;
+            --mono: 'Space Mono', monospace; --sans: 'DM Sans', sans-serif;
+            --radius: 16px; --radius-sm: 10px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+        .orb { position: fixed; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0; }
+        .orb-1 { width: 300px; height: 300px; background: var(--pink-glow); top: -100px; right: -80px; }
+        .orb-2 { width: 250px; height: 250px; background: var(--cyan-glow); bottom: 10%; left: -100px; }
+        .orb-3 { width: 180px; height: 180px; background: var(--gold-glow); top: 40%; right: -60px; }
+        .app { position: relative; z-index: 1; max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
+        .header { padding: 16px 20px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; background: rgba(8,8,13,0.85); backdrop-filter: blur(20px); z-index: 100; border-bottom: 1px solid var(--border); }
+        .back-btn { width: 38px; height: 38px; border-radius: 10px; background: var(--surface2); border: 1px solid var(--border); color: var(--text); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.875rem; }
+        .header-title { font-size: 1rem; font-weight: 600; flex: 1; }
+        .header-icon { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--pink), #ff6b8a); display: flex; align-items: center; justify-content: center; color: white; font-size: 0.875rem; }
+        .hero { padding: 28px 20px 20px; text-align: center; }
+        .hero-label { font-size: 0.6875rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.14em; color: var(--text-dim); margin-bottom: 8px; }
+        .hero-coins { font-size: 3.5rem; font-weight: 700; font-family: var(--mono); background: linear-gradient(135deg, var(--pink), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; letter-spacing: -0.03em; }
+        .hero-coins span { font-size: 1.5rem; vertical-align: super; margin-right: 2px; }
+        .hero-naira { font-size: 1.125rem; font-weight: 600; color: var(--text-mid); margin-top: 8px; font-family: var(--mono); }
+        .hero-naira span { color: var(--success); }
+        .rate-card { margin: 0 20px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; display: flex; align-items: center; justify-content: space-between; }
+        .rate-left { display: flex; align-items: center; gap: 12px; }
+        .rate-icon { width: 42px; height: 42px; border-radius: 12px; background: rgba(254,44,85,0.12); color: var(--pink); display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+        .rate-text { font-size: 0.8125rem; color: var(--text-dim); }
+        .rate-text b { color: var(--text); font-weight: 600; display: block; font-size: 0.9375rem; }
+        .rate-live { font-size: 0.625rem; font-family: var(--mono); color: var(--success); display: flex; align-items: center; gap: 4px; }
+        .rate-live::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--success); box-shadow: 0 0 8px var(--success); animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .section { padding: 0 20px 20px; }
+        .section-title { font-size: 0.75rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-dim); margin-bottom: 12px; }
+        .redeem-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+        .input-group { margin-bottom: 16px; }
+        .input-group:last-child { margin-bottom: 0; }
+        .input-label { font-size: 0.6875rem; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 8px; display: block; }
+        .coin-input-wrap { position: relative; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); display: flex; align-items: center; overflow: hidden; }
+        .coin-input-wrap:focus-within { border-color: rgba(254,44,85,0.5); }
+        .coin-input-wrap input { flex: 1; background: transparent; border: none; color: var(--text); font-family: var(--mono); font-size: 1.25rem; font-weight: 700; padding: 14px 16px; outline: none; width: 100%; }
+        .coin-input-wrap input::placeholder { color: var(--text-dim); opacity: 0.5; }
+        .coin-input-addon { padding: 0 16px; font-size: 0.8125rem; font-weight: 600; color: var(--pink); border-left: 1px solid var(--border); white-space: nowrap; }
+        .naira-preview { background: linear-gradient(135deg, rgba(0,214,143,0.08), rgba(0,214,143,0.02)); border: 1px solid rgba(0,214,143,0.15); border-radius: var(--radius-sm); padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; }
+        .naira-preview-label { font-size: 0.75rem; color: var(--text-dim); }
+        .naira-preview-value { font-family: var(--mono); font-size: 1.125rem; font-weight: 700; color: var(--success); }
+        .quick-amounts { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+        .quick-chip { padding: 8px 16px; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; font-size: 0.8125rem; font-weight: 500; color: var(--text-mid); cursor: pointer; transition: all 0.15s; font-family: var(--mono); }
+        .quick-chip:hover { border-color: var(--pink); color: var(--pink); }
+        .quick-chip.active { background: rgba(254,44,85,0.12); border-color: var(--pink); color: var(--pink); }
+        .bank-list { display: flex; flex-direction: column; gap: 8px; }
+        .bank-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--surface2); border: 1.5px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s; }
+        .bank-item:hover { border-color: var(--border-bright); }
+        .bank-item.active { border-color: var(--pink); background: rgba(254,44,85,0.06); box-shadow: 0 0 0 3px rgba(254,44,85,0.08); }
+        .bank-logo { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, var(--surface3), var(--surface2)); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.625rem; color: var(--text-mid); border: 1px solid var(--border); flex-shrink: 0; }
+        .bank-info { flex: 1; min-width: 0; }
+        .bank-name { font-size: 0.875rem; font-weight: 600; color: var(--text); }
+        .bank-meta { font-size: 0.6875rem; color: var(--text-dim); margin-top: 2px; font-family: var(--mono); }
+        .bank-radio { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border-bright); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; }
+        .bank-item.active .bank-radio { border-color: var(--pink); }
+        .bank-radio-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--pink); transform: scale(0); transition: transform 0.2s; }
+        .bank-item.active .bank-radio-dot { transform: scale(1); }
+        .add-bank-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--surface2); border: 1.5px dashed var(--border-bright); border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s; margin-top: 8px; }
+        .add-bank-item:hover { border-color: var(--pink); background: rgba(254,44,85,0.04); }
+        .add-bank-item .bank-logo { background: rgba(254,44,85,0.1); color: var(--pink); }
+        .add-bank-item .bank-name { color: var(--pink); }
+        .add-bank-item .bank-meta { color: var(--text-dim); }
+        .empty-bank-note { font-size: 0.8125rem; color: var(--text-dim); padding: 4px 2px 4px; }
+        .cta-wrap { padding: 0 20px 24px; margin-top: auto; }
+        .cta-btn { width: 100%; padding: 16px; background: var(--pink); color: white; border: none; border-radius: var(--radius-sm); font-family: var(--sans); font-size: 0.9375rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.15s; box-shadow: 0 4px 20px var(--pink-glow); }
+        .cta-btn:active:not(:disabled) { transform: scale(0.98); }
+        .cta-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+        .info-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.8125rem; }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { color: var(--text-dim); }
+        .info-val { font-weight: 600; font-family: var(--mono); }
+        .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--surface2); border: 1px solid var(--border-bright); color: var(--text); padding: 13px 18px; border-radius: var(--radius); font-size: 0.8125rem; font-weight: 500; display: flex; align-items: center; gap: 9px; opacity: 0; transition: all 0.3s cubic-bezier(.4,0,.2,1); z-index: 9999; white-space: nowrap; }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast.success { border-color: rgba(0,214,143,0.3); }
+        .toast.error { border-color: rgba(255,61,90,0.3); }
+        .spinner-overlay { position:fixed; inset:0; background:rgba(10,10,15,0.95); backdrop-filter:blur(10px); z-index:3000; display:none; flex-direction:column; align-items:center; justify-content:center; gap:1.5rem; }
+        .spinner-overlay.active { display:flex; }
+        .spinner-ring { width:56px; height:56px; position:relative; }
+        .spinner-ring::before { content:''; position:absolute; inset:0; border-radius:50%; border:3px solid transparent; border-top-color:var(--pink); border-right-color:var(--pink-mid); animation:spin 1s linear infinite; }
+        .spinner-ring::after { content:''; position:absolute; inset:8px; border-radius:50%; border:3px solid transparent; border-bottom-color:var(--cyan); border-left-color:var(--gold); animation:spin 1.5s linear infinite reverse; }
+        .spinner-text { font-size: 0.9375rem; font-weight: 600; }
+        .spinner-sub { font-size: 0.75rem; color: var(--text-dim); }
+        .min-warning { background: rgba(245,197,66,0.08); border: 1px solid rgba(245,197,66,0.2); border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; font-size: 0.75rem; color: var(--warning); }
+        .min-warning i { font-size: 0.875rem; }
+        @media (max-width: 380px) { .hero-coins { font-size: 2.8rem; } }
+    </style>
+</head>
+<body>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<div class="app">
+    <div class="header">
+        <div class="back-btn" onclick="window.location.href='pink-dashboard.html'"><i class="fas fa-arrow-left"></i></div>
+        <div class="header-title">Redeem Coins</div>
+        <div class="header-icon"><i class="fas fa-coins"></i></div>
+    </div>
+    <div class="hero">
+        <div class="hero-label">Available Balance</div>
+        <div class="hero-coins" id="coinBalance">0</div>
+        <div class="hero-naira">≈ <span id="nairaBalance">₦0</span></div>
+    </div>
+    <div class="rate-card">
+        <div class="rate-left">
+            <div class="rate-icon"><i class="fas fa-chart-line"></i></div>
+            <div class="rate-text"><b>Live Rate</b>1 Coin = ₦50</div>
+        </div>
+        <div class="rate-live">LIVE</div>
+    </div>
+    <div class="section">
+        <div class="section-title">Amount to Redeem</div>
+        <div class="redeem-card">
+            <div class="input-group">
+                <label class="input-label">Enter Coins</label>
+                <div class="coin-input-wrap">
+                    <input type="number" id="coinInput" placeholder="0" min="0" inputmode="numeric" oninput="calculateNaira()">
+                    <span class="coin-input-addon">COINS</span>
+                </div>
+            </div>
+            <div class="quick-amounts" id="quickAmounts">
+                <div class="quick-chip" onclick="setQuick(40)">40</div>
+                <div class="quick-chip" onclick="setQuick(100)">100</div>
+                <div class="quick-chip" onclick="setQuick(500)">500</div>
+                <div class="quick-chip" onclick="setQuick(1000)">1K</div>
+                <div class="quick-chip" onclick="setQuick(5000)">5K</div>
+            </div>
+            <div class="naira-preview">
+                <span class="naira-preview-label">You'll receive</span>
+                <span class="naira-preview-value" id="nairaPreview">₦0.00</span>
+            </div>
+            <div class="min-warning" id="minWarning" style="display:none;">
+                <i class="fas fa-circle-exclamation"></i>Minimum redeem is 40 coins (₦2,000)
+            </div>
+            <div class="info-row" style="margin-top:12px;">
+                <span class="info-label">Processing Fee</span>
+                <span class="info-val" style="color:var(--warning);" id="feeDisplay">₦0</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Delivery</span>
+                <span class="info-val" style="color:var(--cyan);">Instant</span>
+            </div>
+        </div>
+        <div class="section-title">Choose Bank Account</div>
+        <div class="bank-list" id="bankList"></div>
+        <div class="add-bank-item" onclick="goToPayments()">
+            <div class="bank-logo"><i class="fas fa-plus"></i></div>
+            <div class="bank-info">
+                <div class="bank-name">Add New Bank</div>
+                <div class="bank-meta">Link a new account</div>
+            </div>
+            <div class="bank-radio"><div class="bank-radio-dot"></div></div>
+        </div>
+    </div>
+    <div class="cta-wrap">
+        <button class="cta-btn" id="redeemBtn" onclick="proceedToWithdraw()" disabled>
+            <i class="fas fa-arrow-right"></i> Continue to Withdraw
+        </button>
+    </div>
+</div>
+<div class="spinner-overlay" id="spinnerOverlay">
+    <div class="spinner-ring"></div>
+    <div class="spinner-text">Loading...</div>
+    <div class="spinner-sub">Fetching your balance</div>
+</div>
+<div class="toast" id="toast"><i class="fas fa-check-circle"></i><span id="toastMsg">Success</span></div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    const firebaseConfig = { apiKey: "AIzaSyBUEKYA5x1T2Qb3T8Z6rP5qv5jmfTXlRU0", authDomain: "pink-app-5ecd1.firebaseapp.com", projectId: "pink-app-5ecd1", storageBucket: "pink-app-5ecd1.firebasestorage.app", messagingSenderId: "659145722582", appId: "1:659145722582:web:1e0778ce8aa62dff129777" };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const COIN_RATE = 50;
+    const MIN_COINS = 40;
+    let currentUser = null;
+    let userCoins = 0;
+    let selectedBank = null;
+    let savedBanks = [];
+    let currentFee = 0;
+
+    function generateFee() {
+        currentFee = Math.floor(Math.random() * 51) + 100;
+        document.getElementById('feeDisplay').textContent = '₦' + currentFee.toLocaleString();
+    }
+    generateFee();
+
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            showToast('Please log in first', 'error');
+            setTimeout(() => window.location.href = 'pink-login.html', 1500);
+            return;
+        }
+        currentUser = user;
+        document.getElementById('spinnerOverlay').classList.add('active');
+        loadUserData(user.uid);
+        loadSavedBanks(user.uid);
+    });
+
+    function loadUserData(uid) {
+        onSnapshot(doc(db, 'users', uid), (snap) => {
+            document.getElementById('spinnerOverlay').classList.remove('active');
+            if (!snap.exists()) return;
+            const data = snap.data();
+            userCoins = data.coins || 0;
+            document.getElementById('coinBalance').textContent = userCoins.toLocaleString();
+            document.getElementById('nairaBalance').textContent = '₦' + (userCoins * COIN_RATE).toLocaleString();
+            validateInput();
+        }, (err) => {
+            document.getElementById('spinnerOverlay').classList.remove('active');
+            console.error('Failed to load user data:', err);
+            const localCoins = parseInt(localStorage.getItem('pinkApp_coins')) || 0;
+            userCoins = localCoins;
+            document.getElementById('coinBalance').textContent = userCoins.toLocaleString();
+            document.getElementById('nairaBalance').textContent = '₦' + (userCoins * COIN_RATE).toLocaleString();
+            validateInput();
+        });
+    }
+
+    async function loadSavedBanks(uid) {
+        try {
+            const snap = await getDoc(doc(db, 'users', uid));
+            if (!snap.exists()) { renderBankList(); return; }
+            const data = snap.data();
+            savedBanks = data.banks || [];
+            renderBankList();
+        } catch (e) {
+            console.error('Failed to load saved banks:', e);
+            const localBanks = JSON.parse(localStorage.getItem('pinkApp_banks') || '[]');
+            savedBanks = localBanks;
+            renderBankList();
+        }
+    }
+
+    function renderBankList() {
+        const list = document.getElementById('bankList');
+        list.innerHTML = '';
+        if (savedBanks.length === 0) {
+            selectedBank = null;
+            const note = document.createElement('div');
+            note.className = 'empty-bank-note';
+            note.textContent = 'No bank linked yet — add one below to redeem.';
+            list.appendChild(note);
+            return;
+        }
+        savedBanks.forEach((bank, index) => {
+            const item = document.createElement('div');
+            item.className = 'bank-item' + (index === 0 ? ' active' : '');
+            item.onclick = () => selectBankItem(item, index);
+            item.innerHTML = `<div class="bank-logo">${(bank.bankName || 'B').substring(0,2).toUpperCase()}</div><div class="bank-info"><div class="bank-name">${bank.bankName || 'Unknown Bank'}</div><div class="bank-meta">****${(bank.accountNumber || '').slice(-4)} · ${bank.accountName || ''}</div></div><div class="bank-radio"><div class="bank-radio-dot"></div></div>`;
+            list.appendChild(item);
+        });
+        selectedBank = savedBanks[0];
+    }
+
+    window.calculateNaira = function() {
+        const input = document.getElementById('coinInput');
+        const coins = Math.max(0, parseInt(input.value) || 0);
+        const naira = coins * COIN_RATE;
+        document.getElementById('nairaPreview').textContent = '₦' + naira.toLocaleString() + '.00';
+        document.querySelectorAll('.quick-chip').forEach(chip => {
+            chip.classList.remove('active');
+            if (parseInt(chip.textContent.replace('K', '000')) === coins) chip.classList.add('active');
+        });
+        validateInput();
+    };
+
+    window.setQuick = function(amount) {
+        document.getElementById('coinInput').value = amount;
+        calculateNaira();
+    };
+
+    function validateInput() {
+        const input = document.getElementById('coinInput');
+        const coins = Math.max(0, parseInt(input.value) || 0);
+        const btn = document.getElementById('redeemBtn');
+        const warning = document.getElementById('minWarning');
+        if (coins < MIN_COINS) {
+            warning.style.display = 'flex';
+            warning.innerHTML = '<i class="fas fa-circle-exclamation"></i> Minimum redeem is 40 coins (₦2,000)';
+            btn.disabled = true;
+        } else if (coins > userCoins) {
+            warning.style.display = 'flex';
+            warning.innerHTML = '<i class="fas fa-circle-exclamation"></i> Insufficient coins';
+            btn.disabled = true;
+        } else if (!selectedBank) {
+            warning.style.display = 'flex';
+            warning.innerHTML = '<i class="fas fa-circle-exclamation"></i> Add a bank account to continue';
+            btn.disabled = true;
+        } else {
+            warning.style.display = 'none';
+            btn.disabled = false;
+        }
+    }
+
+    window.selectBankItem = function(el, index) {
+        document.querySelectorAll('.bank-item').forEach(item => item.classList.remove('active'));
+        el.classList.add('active');
+        selectedBank = savedBanks[index];
+        validateInput();
+    };
+
+    window.goToPayments = function() {
+        window.location.href = 'pink-payments.html';
+    };
+
+    window.proceedToWithdraw = function() {
+        const coins = Math.max(0, parseInt(document.getElementById('coinInput').value) || 0);
+        const naira = coins * COIN_RATE;
+        if (coins < MIN_COINS) { showToast('Minimum redeem is 40 coins', 'error'); return; }
+        if (coins > userCoins) { showToast('Insufficient coins', 'error'); return; }
+        if (!selectedBank) { showToast('Please add or select a bank account', 'error'); return; }
+        localStorage.setItem('pinkApp_redeemCoins', coins);
+        localStorage.setItem('pinkApp_redeemNaira', naira);
+        localStorage.setItem('pinkApp_redeemFee', currentFee);
+        localStorage.setItem('pinkApp_redeemBank', JSON.stringify(selectedBank));
+        window.location.href = 'pink-withdraw.html';
+    };
+
+    function showToast(msg, type) {
+        const t = document.getElementById('toast');
+        document.getElementById('toastMsg').textContent = msg;
+        t.querySelector('i').className = type === 'error' ? 'fas fa-circle-xmark' : 'fas fa-check-circle';
+        t.className = 'toast show ' + (type || '');
+        setTimeout(() => t.classList.remove('show'), 3000);
+    }
+</script>
+</body>
+</html>

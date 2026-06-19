@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0a0a0f">
+    <title>Profile - Pink App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pink-primary: #fe2c55;
+            --pink-secondary: #ff6b8a;
+            --pink-glow: rgba(254, 44, 85, 0.4);
+            --bg-dark: #0a0a0f;
+            --bg-darker: #050508;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-hover: rgba(255, 255, 255, 0.06);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.5);
+            --text-muted: rgba(255, 255, 255, 0.3);
+            --gold: #ffd700;
+            --cyan: #25f4ee;
+            --success: #00d26a;
+            --error: #ff4757;
+            --warning: #ffa502;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .ambient-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+        }
+
+        .orb-1 {
+            width: 280px;
+            height: 280px;
+            background: var(--pink-primary);
+            top: -100px;
+            left: -100px;
+        }
+
+        .orb-2 {
+            width: 220px;
+            height: 220px;
+            background: var(--cyan);
+            bottom: 20%;
+            right: -80px;
+            opacity: 0.2;
+        }
+
+        .grain {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+
+        .app-container {
+            position: relative;
+            z-index: 2;
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            padding-bottom: 100px;
+        }
+
+        /* Header */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .header-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .settings-btn {
+            width: 40px;
+            height: 40px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .settings-btn:active {
+            background: var(--glass-hover);
+        }
+
+        /* Profile Hero */
+        .profile-hero {
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+        }
+
+        .avatar-container {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin-bottom: 1rem;
+            cursor: pointer;
+        }
+
+        .avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--pink-primary), var(--pink-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: 800;
+            border: 3px solid rgba(255,255,255,0.1);
+            box-shadow: 0 0 30px rgba(254, 44, 85, 0.3);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            display: none;
+        }
+
+        .avatar img.active {
+            display: block;
+        }
+
+        .avatar-edit {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 32px;
+            height: 32px;
+            background: var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid var(--bg-dark);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .avatar-edit:active {
+            transform: scale(0.9);
+        }
+
+        .avatar-edit svg {
+            width: 14px;
+            height: 14px;
+            color: var(--bg-dark);
+        }
+
+        .profile-name {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .verified-badge {
+            color: var(--cyan);
+            display: flex;
+            align-items: center;
+        }
+
+        .verified-badge svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .profile-handle {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-country {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 0.4rem 0.875rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* Stats Row */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            padding: 0 1.5rem 1.5rem;
+        }
+
+        .stat-box {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .stat-box:active {
+            transform: scale(0.97);
+            background: var(--glass-hover);
+        }
+
+        .stat-box-value {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--pink-secondary);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-box-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Menu Section */
+        .menu-section {
+            padding: 0 1.5rem;
+        }
+
+        .menu-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--glass-border);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .menu-item:active {
+            background: var(--glass-hover);
+        }
+
+        .menu-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .menu-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .menu-icon.pink { background: rgba(254, 44, 85, 0.1); color: var(--pink-primary); }
+        .menu-icon.cyan { background: rgba(37, 244, 238, 0.1); color: var(--cyan); }
+        .menu-icon.gold { background: rgba(255, 215, 0, 0.1); color: var(--gold); }
+        .menu-icon.purple { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
+        .menu-icon.green { background: rgba(0, 210, 106, 0.1); color: var(--success); }
+        .menu-icon.red { background: rgba(255, 71, 87, 0.1); color: var(--error); }
+        .menu-icon.orange { background: rgba(255, 165, 2, 0.1); color: var(--warning); }
+
+        .menu-content {
+            flex: 1;
+        }
+
+        .menu-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.15rem;
+        }
+
+        .menu-sublabel {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .menu-arrow {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .menu-arrow svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Bottom Nav - Dashboard Style */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-width: 480px;
+            margin: 0 auto;
+            height: 70px;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(30px);
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.65rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            padding: 0.5rem;
+        }
+
+        .nav-item svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .nav-item.active {
+            color: var(--pink-primary);
+        }
+
+        /* Spinner Overlay */
+        .spinner-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 3000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+
+        .spinner-overlay.active {
+            display: flex;
+        }
+
+        .spinner-ring {
+            width: 56px;
+            height: 56px;
+            position: relative;
+        }
+
+        .spinner-ring::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: var(--pink-primary);
+            border-right-color: var(--pink-secondary);
+            animation: spin 1s linear infinite;
+        }
+
+        .spinner-ring::after {
+            content: '';
+            position: absolute;
+            inset: 8px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-bottom-color: var(--cyan);
+            border-left-color: var(--gold);
+            animation: spin 1.5s linear infinite reverse;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: rgba(0, 210, 106, 0.9);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 0.875rem 1.5rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            z-index: 4000;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            white-space: nowrap;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Logout Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 5000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 340px;
+            text-align: center;
+            backdrop-filter: blur(20px);
+        }
+
+        .modal-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--error), #dc2626);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            box-shadow: 0 10px 30px rgba(255, 71, 87, 0.3);
+        }
+
+        .modal-icon svg {
+            width: 28px;
+            height: 28px;
+            color: white;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-text {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .modal-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .modal-btn {
+            width: 100%;
+            padding: 0.875rem;
+            border-radius: 14px;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .modal-btn.primary {
+            background: linear-gradient(135deg, var(--error), #dc2626);
+            color: white;
+        }
+
+        .modal-btn.primary:active {
+            transform: scale(0.97);
+        }
+
+        .modal-btn.secondary {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+        }
+
+        .modal-btn.secondary:active {
+            background: var(--glass-hover);
+        }
+
+        /* Hidden file input */
+        #avatarInput {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+    <div class="grain"></div>
+
+    <div class="app-container">
+        <header class="header">
+            <div class="header-title">Profile</div>
+            <a href="pink-settings.html" class="settings-btn" onclick="navigateTo('pink-settings.html'); return false;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+            </a>
+        </header>
+
+        <!-- Profile Hero -->
+        <div class="profile-hero">
+            <div class="avatar-container" onclick="changeAvatar()">
+                <div class="avatar" id="userAvatar">
+                    <span id="avatarInitial">U</span>
+                    <img id="avatarImg" alt="Profile">
+                </div>
+                <div class="avatar-edit">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                        <circle cx="12" cy="13" r="4"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="profile-name">
+                <span id="userName">User</span>
+                <span class="verified-badge" id="verifiedBadge" style="display:none;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                </span>
+            </div>
+            <div class="profile-handle" id="userHandle">@user</div>
+            <div class="profile-country">
+                <span id="countryFlag">🇳🇬</span>
+                <span id="countryName">Nigeria</span>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="stat-box-value" id="statCoins">0</div>
+                <div class="stat-box-label">Coins</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-box-value" id="statStreak">0</div>
+                <div class="stat-box-label">Day Streak</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-box-value" id="statVideos">0</div>
+                <div class="stat-box-label">Videos</div>
+            </div>
+        </div>
+
+        <!-- Menu -->
+        <div class="menu-section">
+            <div class="menu-card">
+                <a href="pink-earn.html" class="menu-item" onclick="navigateTo('pink-earn.html'); return false;">
+                    <div class="menu-icon pink">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="5 3 19 12 5 21 5 3"/>
+                        </svg>
+                    </div>
+                    <div class="menu-content">
+                        <div class="menu-label">Watch & Earn</div>
+                        <div class="menu-sublabel">Watch videos to earn coins</div>
+                    </div>
+                    <span class="menu-arrow">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"/>
+                        </svg>
+                    </span>
+                </a>
+                <a href="pink-daily.html" class="menu-item" onclick="navigateTo('pink-daily.html'); return false;">
+                    <div class="menu-icon gold">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 12 20 22 4 22 4 12"/>
+                            <rect x="2" y="7" width="20" height="5"/>
+                            <line x1="12" y1="22" x2="12" y2="7"/>
+                            <path d="M12 7V3l-4 4 4-4 4 4-4-4z"/>
+                        </svg>
+                    </div>
+                    <div class="menu-content">
+                        <div class="menu-label">Daily Rewards</div>
+                        <div class="menu-sublabel">Claim your daily bonus</div>
+                    </div>
+                    <span class="menu-arrow">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"/>
+                        </svg>
+                    </span>
+                </a>
+                <a href="pink-dashboard.html" class="menu-item" onclick="navigateTo('pink-dashboard.html'); return false;">
+                    <div class="menu-icon cyan">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="20" x2="18" y2="10"/>
+                            <line x1="12" y1="20" x2="12" y2="4"/>
+                            <line x1="6" y1="20" x2="6" y2="14"/>
+                        </svg>
+                    </div>
+                    <div class="menu-content">
+                        <div class="menu-label">Dashboard</div>
+                        <div class="menu-sublabel">View your earnings</div>
+                    </div>
+                    <span class="menu-arrow">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"/>
+                        </svg>
+                    </span>
+                </a>
+            </div>
+
+            <div class="menu-card">
+                <!-- About Pink App link replaces toggles -->
+                <a href="pink-about.html" class="menu-item" onclick="navigateTo('pink-about.html'); return false;">
+                    <div class="menu-icon orange">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="16" x2="12" y2="12"/>
+                            <line x1="12" y1="8" x2="12.01" y2="8"/>
+                        </svg>
+                    </div>
+                    <div class="menu-content">
+                        <div class="menu-label">About Pink App</div>
+                        <div class="menu-sublabel">Learn how to earn & withdraw</div>
+                    </div>
+                    <span class="menu-arrow">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"/>
+                        </svg>
+                    </span>
+                </a>
+                <div class="menu-item" onclick="showToast('Help center coming soon!')">
+                    <div class="menu-icon green">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                            <line x1="12" y1="17" x2="12.01" y2="17"/>
+                        </svg>
+                    </div>
+                    <div class="menu-content">
+                        <div class="menu-label">Help Center</div>
+                        <div class="menu-sublabel">FAQs & support</div>
+                    </div>
+                    <span class="menu-arrow">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"/>
+                        </svg>
+                    </span>
+                </div>
+            </div>
+
+            <div class="menu-card">
+                <div class="menu-item" onclick="showLogoutModal()">
+                    <div class="menu-icon red">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                            <polyline points="16 17 21 12 16 7"/>
+                            <line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
+                    </div>
+                    <div class="menu-content">
+                        <div class="menu-label">Logout</div>
+                        <div class="menu-sublabel">Sign out of your account</div>
+                    </div>
+                    <span class="menu-arrow">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"/>
+                        </svg>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Nav - Dashboard Style -->
+    <nav class="bottom-nav">
+        <div class="nav-item" onclick="navigateTo('pink-dashboard.html')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+            <span>Home</span>
+        </div>
+        <div class="nav-item" onclick="navigateTo('pink-earn.html')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+            <span>Earn</span>
+        </div>
+        <div class="nav-item" onclick="navigateTo('pink-survey.html')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+            </svg>
+            <span>Surveys</span>
+        </div>
+        <div class="nav-item" onclick="navigateTo('pink-daily.html')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <span>Rewards</span>
+        </div>
+        <div class="nav-item active" onclick="navigateTo('pink-profile.html')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+            </svg>
+            <span>Profile</span>
+        </div>
+    </nav>
+
+    <!-- Logout Modal -->
+    <div class="modal-overlay" id="logoutModal" onclick="closeLogoutModal(event)">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <div class="modal-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+            </div>
+            <div class="modal-title">Logout</div>
+            <div class="modal-text">Are you sure you want to sign out? You'll need to login again.</div>
+            <div class="modal-buttons">
+                <button class="modal-btn primary" onclick="confirmLogout()">Yes, Logout</button>
+                <button class="modal-btn secondary" onclick="closeLogoutModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Spinner Overlay -->
+    <div class="spinner-overlay" id="spinnerOverlay">
+        <div class="spinner-ring"></div>
+        <div style="color:var(--text-secondary);font-size:0.9rem;letter-spacing:1px;">Loading...</div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Hidden file input for avatar -->
+    <input type="file" id="avatarInput" accept="image/*" onchange="handleAvatarChange(event)">
+
+    <script>
+        const COUNTRY_FLAGS = {
+            'NG': '🇳🇬', 'GH': '🇬🇭', 'KE': '🇰🇪', 'ZA': '🇿🇦', 'UG': '🇺🇬',
+            'TZ': '🇹🇿', 'RW': '🇷🇼', 'ET': '🇪🇹', 'EG': '🇪🇬', 'MA': '🇲🇦',
+            'SN': '🇸🇳', 'CI': "Côte d'Ivoire", 'CM': '🇨🇲', 'DZ': '🇩🇿', 'TN': '🇹🇳',
+            'ZM': '🇿🇲', 'ZW': '🇿🇼', 'MW': '🇲🇼', 'MZ': '🇲🇿', 'AO': '🇦🇴',
+            'CD': '🇨🇩', 'GA': '🇬🇦', 'BW': '🇧🇼', 'NA': '🇳🇦', 'SZ': '🇸🇿',
+            'LS': '🇱🇸', 'MG': '🇲🇬', 'MU': '🇲🇺', 'SC': '🇸🇨', 'SD': '🇸🇩',
+            'SS': '🇸🇸', 'SO': '🇸🇴', 'DJ': '🇩🇯', 'ER': '🇪🇷', 'LR': '🇱🇷',
+            'SL': '🇸🇱', 'GN': '🇬🇳', 'GW': '🇬🇼', 'GM': '🇬🇲', 'CV': '🇨🇻',
+            'ST': '🇸🇹', 'TD': '🇹🇩', 'CF': '🇨🇫', 'GQ': '🇬🇶', 'BJ': '🇧🇯',
+            'TG': '🇹🇬', 'BF': '🇧🇫', 'ML': '🇲🇱', 'NE': '🇳🇪', 'MR': '🇲🇷',
+            'BI': '🇧🇮', 'KM': '🇰🇲', 'LY': '🇱🇾'
+        };
+
+        const COUNTRY_NAMES = {
+            'NG': 'Nigeria', 'GH': 'Ghana', 'KE': 'Kenya', 'ZA': 'South Africa', 'UG': 'Uganda',
+            'TZ': 'Tanzania', 'RW': 'Rwanda', 'ET': 'Ethiopia', 'EG': 'Egypt', 'MA': 'Morocco',
+            'SN': 'Senegal', 'CI': "Côte d'Ivoire", 'CM': 'Cameroon', 'DZ': 'Algeria', 'TN': 'Tunisia',
+            'ZM': 'Zambia', 'ZW': 'Zimbabwe', 'MW': 'Malawi', 'MZ': 'Mozambique', 'AO': 'Angola',
+            'CD': 'DR Congo', 'GA': 'Gabon', 'BW': 'Botswana', 'NA': 'Namibia', 'SZ': 'Eswatini',
+            'LS': 'Lesotho', 'MG': 'Madagascar', 'MU': 'Mauritius', 'SC': 'Seychelles', 'SD': 'Sudan',
+            'SS': 'South Sudan', 'SO': 'Somalia', 'DJ': 'Djibouti', 'ER': 'Eritrea', 'LR': 'Liberia',
+            'SL': 'Sierra Leone', 'GN': 'Guinea', 'GW': 'Guinea-Bissau', 'GM': 'Gambia', 'CV': 'Cabo Verde',
+            'ST': 'São Tomé', 'TD': 'Chad', 'CF': 'CAR', 'GQ': 'Eq. Guinea', 'BJ': 'Benin',
+            'TG': 'Togo', 'BF': 'Burkina Faso', 'ML': 'Mali', 'NE': 'Niger', 'MR': 'Mauritania',
+            'BI': 'Burundi', 'KM': 'Comoros', 'LY': 'Libya'
+        };
+
+        function init() {
+            const userData = JSON.parse(localStorage.getItem('pinkApp_userData') || '{}');
+            const country = localStorage.getItem('pinkApp_country') || 'NG';
+            const coins = parseInt(localStorage.getItem('pinkApp_coins')) || 0;
+            const streak = parseInt(localStorage.getItem('pinkApp_streak')) || 0;
+            const videos = parseInt(localStorage.getItem('pinkApp_videos')) || 0;
+
+            // Profile info
+            const name = userData.nickname || userData.fullName || 'User';
+            document.getElementById('userName').textContent = name;
+            document.getElementById('avatarInitial').textContent = name.charAt(0).toUpperCase();
+
+            if (userData.email) {
+                document.getElementById('userHandle').textContent = '@' + userData.email.split('@')[0];
+            }
+
+            // Avatar image sync with dashboard — uses SAME localStorage key
+            const avatarUrl = localStorage.getItem('pinkApp_avatar');
+            const avatarImg = document.getElementById('avatarImg');
+            const avatarInitial = document.getElementById('avatarInitial');
+
+            if (avatarUrl && avatarUrl.startsWith('data:image')) {
+                avatarImg.src = avatarUrl;
+                avatarImg.classList.add('active');
+                avatarInitial.style.display = 'none';
+            } else {
+                avatarImg.classList.remove('active');
+                avatarInitial.style.display = 'flex';
+            }
+
+            // Country
+            document.getElementById('countryFlag').textContent = COUNTRY_FLAGS[country] || '🇳🇬';
+            document.getElementById('countryName').textContent = COUNTRY_NAMES[country] || 'Nigeria';
+
+            // Stats
+            document.getElementById('statCoins').textContent = coins.toLocaleString();
+            document.getElementById('statStreak').textContent = streak;
+            document.getElementById('statVideos').textContent = videos.toLocaleString();
+
+            // Verified badge if active
+            const isActivated = localStorage.getItem('isActivated') === 'true';
+            if (isActivated) {
+                document.getElementById('verifiedBadge').style.display = 'inline-flex';
+            }
+        }
+
+        function changeAvatar() {
+            document.getElementById('avatarInput').click();
+        }
+
+        function handleAvatarChange(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.size > 2 * 1024 * 1024) {
+                showToast('Image too large. Max 2MB.', false);
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const dataUrl = e.target.result;
+                
+                // Save to SAME key the dashboard uses
+                localStorage.setItem('pinkApp_avatar', dataUrl);
+                
+                // Update UI immediately
+                const avatarImg = document.getElementById('avatarImg');
+                const avatarInitial = document.getElementById('avatarInitial');
+                
+                avatarImg.src = dataUrl;
+                avatarImg.classList.add('active');
+                avatarInitial.style.display = 'none';
+                
+                showToast('Profile picture updated!', true);
+            };
+            reader.onerror = function() {
+                showToast('Failed to read image. Try again.', false);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function showLogoutModal() {
+            document.getElementById('logoutModal').classList.add('active');
+        }
+
+        function closeLogoutModal(event) {
+            if (!event || event.target.id === 'logoutModal') {
+                document.getElementById('logoutModal').classList.remove('active');
+            }
+        }
+
+        function confirmLogout() {
+            closeLogoutModal();
+            localStorage.removeItem('pinkApp_loggedIn');
+            localStorage.removeItem('pinkApp_userData');
+            navigateTo('pink-login.html');
+        }
+
+        function navigateTo(url) {
+            const overlay = document.getElementById('spinnerOverlay');
+            overlay.classList.add('active');
+            setTimeout(() => {
+                window.location.href = url;
+            }, 800);
+        }
+
+        function showToast(message, isSuccess) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.background = isSuccess ? 'rgba(0, 210, 106, 0.9)' : 'rgba(255, 71, 87, 0.9)';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Listen for avatar changes from other tabs/pages
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'pinkApp_avatar') {
+                const avatarUrl = e.newValue;
+                const avatarImg = document.getElementById('avatarImg');
+                const avatarInitial = document.getElementById('avatarInitial');
+                
+                if (avatarUrl && avatarUrl.startsWith('data:image')) {
+                    avatarImg.src = avatarUrl;
+                    avatarImg.classList.add('active');
+                    avatarInitial.style.display = 'none';
+                } else {
+                    avatarImg.classList.remove('active');
+                    avatarInitial.style.display = 'flex';
+                }
+            }
+        });
+
+        init();
+    </script>
+</body>
+</html>

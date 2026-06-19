@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0a0a0f">
+    <title>Payment Methods - Pink App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pink-primary: #fe2c55; --pink-secondary: #ff6b8a; --bg-dark: #0a0a0f; --bg-darker: #050508;
+            --glass-bg: rgba(255,255,255,0.03); --glass-border: rgba(255,255,255,0.08); --glass-hover: rgba(255,255,255,0.06);
+            --text-primary: #ffffff; --text-secondary: rgba(255,255,255,0.5); --text-muted: rgba(255,255,255,0.3);
+            --gold: #ffd700; --cyan: #25f4ee; --success: #00d26a; --error: #ff4757;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; font-family:'Outfit',sans-serif; }
+        body { background:var(--bg-dark); color:var(--text-primary); min-height:100vh; overflow-x:hidden; position:relative; }
+        .ambient-bg { position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
+        .orb { position:absolute; border-radius:50%; filter:blur(80px); opacity:0.4; }
+        .orb-1 { width:280px; height:280px; background:var(--pink-primary); top:-100px; right:-100px; }
+        .orb-2 { width:220px; height:220px; background:var(--cyan); bottom:20%; left:-80px; opacity:0.2; }
+        .grain { position:fixed; inset:0; z-index:1; opacity:0.03; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E"); pointer-events:none; }
+        .app-container { position:relative; z-index:2; max-width:480px; margin:0 auto; min-height:100vh; padding-bottom:2rem; }
+        .header { position:sticky; top:0; z-index:100; background:rgba(10,10,15,0.95); backdrop-filter:blur(20px); padding:1rem 1.5rem; display:flex; align-items:center; gap:1rem; border-bottom:1px solid var(--glass-border); }
+        .back-btn { width:40px; height:40px; background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:12px; display:flex; align-items:center; justify-content:center; color:var(--text-primary); cursor:pointer; transition:all 0.3s; text-decoration:none; flex-shrink:0; }
+        .back-btn:active { background:var(--glass-hover); }
+        .header-title { font-size:1.1rem; font-weight:700; }
+        .page-content { padding:1.5rem; }
+        .section-label { font-size:0.75rem; font-weight:600; color:var(--pink-secondary); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:0.75rem; padding-left:0.25rem; }
+        .settings-card { background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:20px; overflow:hidden; margin-bottom:1rem; }
+        .settings-item { display:flex; align-items:center; gap:1rem; padding:1rem 1.25rem; border-bottom:1px solid var(--glass-border); cursor:pointer; transition:all 0.3s; text-decoration:none; color:inherit; }
+        .settings-item:last-child { border-bottom:none; }
+        .settings-item:active { background:var(--glass-hover); }
+        .settings-icon { width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .settings-icon svg { width:20px; height:20px; }
+        .settings-icon.pink { background:rgba(254,44,85,0.1); color:var(--pink-primary); }
+        .settings-icon.cyan { background:rgba(37,244,238,0.1); color:var(--cyan); }
+        .settings-icon.gold { background:rgba(255,215,0,0.1); color:var(--gold); }
+        .settings-icon.green { background:rgba(0,210,106,0.1); color:var(--success); }
+        .settings-content { flex:1; }
+        .settings-label { font-size:0.9rem; font-weight:600; margin-bottom:0.15rem; }
+        .settings-desc { font-size:0.75rem; color:var(--text-muted); }
+        .settings-arrow { color:var(--text-muted); font-size:0.8rem; }
+        .bank-card { background:linear-gradient(135deg, rgba(254,44,85,0.15), rgba(37,244,238,0.08)); border:1px solid var(--glass-border); border-radius:20px; padding:1.5rem; margin-bottom:1rem; position:relative; overflow:hidden; }
+        .bank-card::before { content:''; position:absolute; top:-50%; right:-30%; width:200px; height:200px; background:radial-gradient(circle, rgba(254,44,85,0.1), transparent 70%); border-radius:50%; }
+        .bank-name { font-size:0.8rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:0.5rem; }
+        .bank-number { font-size:1.4rem; font-weight:700; letter-spacing:3px; margin-bottom:0.5rem; font-family:'Courier New',monospace; }
+        .bank-holder { font-size:0.85rem; color:var(--text-secondary); }
+        .bank-actions { display:flex; gap:0.5rem; margin-top:1rem; }
+        .bank-action-btn { padding:0.5rem 1rem; background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:10px; color:var(--text-primary); font-size:0.75rem; font-weight:600; cursor:pointer; transition:all 0.3s; }
+        .bank-action-btn:active { background:var(--glass-hover); }
+        .add-card-btn { width:100%; padding:1.25rem; background:var(--glass-bg); border:2px dashed var(--glass-border); border-radius:16px; color:var(--text-muted); font-size:0.9rem; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; transition:all 0.3s; }
+        .add-card-btn:active { border-color:var(--pink-primary); color:var(--pink-primary); }
+        .input-group { padding:0.5rem 0; position:relative; }
+        .input-label { font-size:0.8rem; font-weight:600; color:var(--text-secondary); margin-bottom:0.5rem; display:block; }
+        .input-field { width:100%; padding:0.875rem 1rem; background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:12px; color:var(--text-primary); font-size:0.9rem; font-family:'Outfit',sans-serif; outline:none; transition:all 0.3s; }
+        .input-field:focus { border-color:var(--pink-primary); box-shadow:0 0 0 3px rgba(254,44,85,0.1); }
+        .input-field::placeholder { color:var(--text-muted); }
+        .input-field.verified { border-color:var(--success); background:rgba(0,210,106,0.05); }
+        .input-field.error { border-color:var(--error); background:rgba(255,71,87,0.05); }
+        .input-field:read-only { opacity:0.7; }
+        .char-counter { text-align:right; font-size:0.7rem; color:var(--text-muted); margin-top:0.25rem; }
+        .char-counter.complete { color:var(--success); font-weight:600; }
+        .verify-status { font-size:0.75rem; margin-top:0.35rem; font-weight:500; display:flex; align-items:center; gap:0.35rem; }
+        .verify-status.success { color:var(--success); }
+        .verify-status.error { color:var(--error); }
+        .input-spinner { position:absolute; right:14px; top:42px; width:18px; height:18px; border:2px solid rgba(255,255,255,0.1); border-top-color:var(--pink-primary); border-radius:50%; animation:spin 0.8s linear infinite; display:none; }
+        .input-spinner.show { display:block; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+        .bank-select-btn { width:100%; padding:0.875rem 1rem; background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:12px; color:var(--text-primary); font-size:0.9rem; font-weight:500; cursor:pointer; text-align:left; display:flex; align-items:center; justify-content:space-between; transition:all 0.3s; }
+        .bank-select-btn:hover { border-color:var(--pink-primary); }
+        .bank-select-btn.placeholder { color:var(--text-muted); }
+        .bank-select-btn svg { width:18px; height:18px; color:var(--text-muted); transition:transform 0.3s; }
+        .bank-select-btn.active svg { transform:rotate(180deg); }
+        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(10px); z-index:5000; display:none; align-items:flex-end; justify-content:center; }
+        .modal-overlay.active { display:flex; }
+        .modal-overlay.centered { align-items:center; padding:1.5rem; }
+        .bank-modal-sheet { background:var(--bg-dark); border-radius:24px 24px 0 0; width:100%; max-width:480px; max-height:75vh; overflow:hidden; border:1px solid var(--glass-border); border-bottom:none; transform:translateY(100%); transition:transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275); }
+        .modal-overlay.active .bank-modal-sheet { transform:translateY(0); }
+        .bank-modal-header { padding:1.25rem 1.5rem; border-bottom:1px solid var(--glass-border); display:flex; justify-content:space-between; align-items:center; }
+        .bank-modal-title { font-size:1.1rem; font-weight:700; }
+        .bank-modal-close { width:32px; height:32px; border-radius:50%; background:var(--glass-bg); border:1px solid var(--glass-border); display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text-secondary); font-size:1.25rem; }
+        .bank-search { padding:0.75rem 1.5rem; border-bottom:1px solid var(--glass-border); }
+        .bank-search input { width:100%; padding:0.75rem 1rem; border:1px solid var(--glass-border); border-radius:10px; font-size:0.9rem; outline:none; background:var(--bg-darker); color:var(--text-primary); }
+        .bank-search input:focus { border-color:var(--pink-primary); }
+        .bank-list { overflow-y:auto; max-height:50vh; padding:0.5rem 0; }
+        .bank-category { padding:0.6rem 1.5rem; font-size:0.7rem; font-weight:700; color:var(--pink-primary); background:rgba(254,44,85,0.08); text-transform:uppercase; letter-spacing:0.5px; }
+        .bank-option { padding:0.875rem 1.5rem; cursor:pointer; transition:all 0.2s; border-bottom:1px solid var(--glass-border); font-size:0.85rem; color:var(--text-primary); }
+        .bank-option:hover { background:var(--glass-hover); }
+        .bank-option.selected { background:rgba(254,44,85,0.1); color:var(--pink-primary); font-weight:600; }
+        .modal-card { background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:24px; padding:2rem; width:100%; max-width:340px; text-align:center; backdrop-filter:blur(20px); }
+        .modal-icon { width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem; }
+        .modal-icon.warning { background:linear-gradient(135deg, var(--error), #dc2626); box-shadow:0 10px 30px rgba(255,71,87,0.3); }
+        .modal-icon.success { background:linear-gradient(135deg, var(--success), #16a34a); box-shadow:0 10px 30px rgba(0,210,106,0.3); }
+        .modal-icon svg { width:28px; height:28px; color:white; }
+        .modal-title { font-size:1.25rem; font-weight:700; margin-bottom:0.5rem; }
+        .modal-text { font-size:0.85rem; color:var(--text-secondary); margin-bottom:1.5rem; line-height:1.5; }
+        .modal-buttons { display:flex; flex-direction:column; gap:0.75rem; }
+        .modal-btn { width:100%; padding:0.875rem; border-radius:14px; border:none; font-size:0.9rem; font-weight:600; cursor:pointer; transition:all 0.3s; }
+        .modal-btn.primary { background:linear-gradient(135deg, var(--pink-primary), var(--pink-secondary)); color:white; }
+        .modal-btn.primary:active { transform:scale(0.97); }
+        .modal-btn.primary:disabled { opacity:0.5; cursor:not-allowed; }
+        .modal-btn.secondary { background:var(--glass-bg); border:1px solid var(--glass-border); color:var(--text-primary); }
+        .modal-btn.secondary:active { background:var(--glass-hover); }
+        .empty-state { text-align:center; padding:3rem 1.5rem; color:var(--text-muted); }
+        .empty-state svg { width:48px; height:48px; margin-bottom:1rem; opacity:0.5; }
+        .status-badge { display:inline-flex; align-items:center; gap:0.35rem; padding:0.25rem 0.6rem; border-radius:20px; font-size:0.7rem; font-weight:600; }
+        .status-badge.enabled { background:rgba(0,210,106,0.15); color:var(--success); }
+        .status-badge.default { background:rgba(254,44,85,0.15); color:var(--pink-primary); }
+        .spinner-overlay { position:fixed; inset:0; background:rgba(10,10,15,0.95); backdrop-filter:blur(10px); z-index:3000; display:none; flex-direction:column; align-items:center; justify-content:center; gap:1.5rem; }
+        .spinner-overlay.active { display:flex; }
+        .spinner-ring { width:56px; height:56px; position:relative; }
+        .spinner-ring::before { content:''; position:absolute; inset:0; border-radius:50%; border:3px solid transparent; border-top-color:var(--pink-primary); border-right-color:var(--pink-secondary); animation:spin 1s linear infinite; }
+        .spinner-ring::after { content:''; position:absolute; inset:8px; border-radius:50%; border:3px solid transparent; border-bottom-color:var(--cyan); border-left-color:var(--gold); animation:spin 1.5s linear infinite reverse; }
+        .toast { position:fixed; top:1.5rem; left:50%; transform:translateX(-50%) translateY(-100px); background:rgba(0,210,106,0.9); backdrop-filter:blur(10px); color:white; padding:0.875rem 1.5rem; border-radius:12px; font-size:0.9rem; font-weight:500; z-index:4000; transition:transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275); white-space:nowrap; }
+        .toast.show { transform:translateX(-50%) translateY(0); }
+        .toast.error { background:rgba(255,71,87,0.9); }
+        .auth-loading { position:fixed; inset:0; background:var(--bg-dark); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1.5rem; }
+        .auth-loading.hidden { display:none !important; }
+        .auth-loading-text { color:var(--text-secondary); font-size:0.9rem; letter-spacing:1px; }
+    </style>
+</head>
+<body>
+    <div class="ambient-bg"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+    <div class="grain"></div>
+
+    <div class="auth-loading" id="authLoading">
+        <div class="spinner-ring"></div>
+        <div class="auth-loading-text">Restoring session...</div>
+    </div>
+
+    <div class="app-container" id="appContainer" style="display:none;">
+        <header class="header">
+            <a href="pink-settings.html" class="back-btn" onclick="navigateTo('pink-settings.html'); return false;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            </a>
+            <div class="header-title">Payment Methods</div>
+        </header>
+
+        <div class="page-content">
+            <div class="section-label">Bank Accounts</div>
+            <div id="banksContainer">
+                <div class="settings-card" id="banksList">
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+                        </svg>
+                        <p>Loading bank accounts...</p>
+                    </div>
+                </div>
+            </div>
+
+            <button class="add-card-btn" onclick="openAddBankModal()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Add New Bank Account
+            </button>
+
+            <div class="section-label" style="margin-top:1.5rem">Wallets</div>
+            <div class="settings-card">
+                <div class="settings-item">
+                    <div class="settings-icon gold">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/>
+                        </svg>
+                    </div>
+                    <div class="settings-content">
+                        <div class="settings-label">Pink App Wallet</div>
+                        <div class="settings-desc" id="walletBalance">Loading...</div>
+                    </div>
+                    <span class="status-badge enabled">Active</span>
+                </div>
+            </div>
+
+            <div class="section-label">Transaction History</div>
+            <div class="settings-card">
+                <div class="settings-item" onclick="navigateTo('pink-history.html')">
+                    <div class="settings-icon cyan">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                    </div>
+                    <div class="settings-content">
+                        <div class="settings-label">View All Transactions</div>
+                        <div class="settings-desc">Withdrawals, deposits, earnings</div>
+                    </div>
+                    <span class="settings-arrow">›</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="addBankModal" onclick="if(event.target===this)closeModal('addBankModal')">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <div class="modal-icon warning" id="addBankIcon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+                </svg>
+            </div>
+            <div class="modal-title" id="addBankTitle">Add Bank Account</div>
+            <div class="modal-text" id="addBankSubtitle">Enter your bank details. We'll verify the account automatically.</div>
+            <div style="text-align:left">
+                <div class="input-group">
+                    <label class="input-label">Account Number</label>
+                    <div style="position:relative;">
+                        <input type="text" class="input-field" id="bankAccNumber" placeholder="10-digit number" maxlength="10" oninput="onAccountInput(this)">
+                        <div class="input-spinner" id="accSpinner"></div>
+                    </div>
+                    <div class="char-counter" id="accCounter">0/10</div>
+                    <div class="verify-status" id="accVerifyStatus" style="display:none;"></div>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Bank Name</label>
+                    <button type="button" class="bank-select-btn placeholder" id="bankSelectBtn" onclick="openBankPicker()">
+                        <span id="bankSelectText">Select Bank</span>
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Account Name <span style="color:var(--text-muted);font-weight:400;">(Auto-verified)</span></label>
+                    <input type="text" class="input-field" id="bankAccName" placeholder="Account name will appear here" readonly>
+                </div>
+            </div>
+            <div class="modal-buttons" style="margin-top:1rem">
+                <button class="modal-btn primary" onclick="addBank()" id="addBankBtn">Verify & Add Account</button>
+                <button class="modal-btn secondary" onclick="closeModal('addBankModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="bankPickerModal" onclick="if(event.target===this)closeBankPicker()">
+        <div class="bank-modal-sheet" onclick="event.stopPropagation()">
+            <div class="bank-modal-header">
+                <div class="bank-modal-title">Select Bank</div>
+                <button class="bank-modal-close" onclick="closeBankPicker()">×</button>
+            </div>
+            <div class="bank-search">
+                <input type="text" id="bankSearch" placeholder="Search banks..." oninput="filterBankList()">
+            </div>
+            <div class="bank-list" id="bankList"></div>
+        </div>
+    </div>
+
+    <div class="spinner-overlay" id="spinnerOverlay">
+        <div class="spinner-ring"></div>
+        <div style="color:var(--text-secondary);font-size:0.9rem;letter-spacing:1px;">Loading...</div>
+    </div>
+    <div class="toast" id="toast"></div>
+
+    <script>
+        function navigateTo(url) {
+            const overlay = document.getElementById('spinnerOverlay');
+            if(overlay) overlay.classList.add('active');
+            setTimeout(() => { window.location.href = url; }, 800);
+        }
+        function showToast(message, isSuccess) {
+            const toast = document.getElementById('toast');
+            if(!toast) return;
+            toast.textContent = message;
+            toast.style.background = isSuccess ? 'rgba(0,210,106,0.9)' : 'rgba(255,71,87,0.9)';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+        function showError(msg) { showToast(msg, false); }
+        function showSuccess(msg) { showToast(msg, true); }
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        // ===== CORRECTED FIREBASE CONFIG (same as pink-login.html) =====
+        const firebaseConfig = {
+            apiKey: "AIzaSyBUEKYA5x1T2Qb3T8Z6rP5qv5jmfTXlRU0",
+            authDomain: "pink-app-5ecd1.firebaseapp.com",
+            projectId: "pink-app-5ecd1",
+            storageBucket: "pink-app-5ecd1.firebasestorage.app",
+            messagingSenderId: "659145722582",
+            appId: "1:659145722582:web:1e0778ce8aa62dff129777",
+            measurementId: "G-G299LL6DM6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        await setPersistence(auth, browserLocalPersistence);
+
+        const PAYSTACK_SECRET_KEY = 'sk_live_0346be28513a9e06eb411b0ee8f226256eb1cb39';
+        const PAYSTACK_RESOLVE_URL = 'https://api.paystack.co/bank/resolve';
+
+        const bankCodes = {
+            "Access Bank PLC": "044", "Citibank Nigeria Limited": "023", "Ecobank Nigeria PLC": "050",
+            "Fidelity Bank PLC": "070", "First Bank of Nigeria Limited": "011", "First City Monument Bank PLC (FCMB)": "214",
+            "Globus Bank Limited": "00103", "Guaranty Trust Bank PLC (GTBank)": "058", "Keystone Bank Limited": "082",
+            "Nova Commercial Bank Limited": "056", "Optimus Bank": "00107", "Parallex Bank Limited": "00104",
+            "Polaris Bank PLC": "076", "PremiumTrust Bank": "00106", "Providus Bank Limited": "101",
+            "Signature Bank Limited": "00108", "Stanbic IBTC Bank PLC": "221", "Standard Chartered Bank Nigeria Limited": "068",
+            "Sterling Bank PLC": "232", "SunTrust Bank Nigeria Limited": "100", "Taj Bank Limited": "00102",
+            "Titan Trust Bank Limited": "00105", "Union Bank of Nigeria Plc": "032", "United Bank for Africa Plc (UBA)": "033",
+            "Unity Bank PLC": "215", "Wema Bank PLC": "035", "Zenith Bank PLC": "057", "Jaiz Bank PLC": "301",
+            "Heritage Banking Company Limited": "030", "Lotus Bank": "00109", "Alpha Morgan Bank": "00110",
+            "OPay Digital Services Limited": "999992", "PalmPay Limited": "999991", "Kuda Microfinance Bank": "50211",
+            "Moniepoint Microfinance Bank": "50515", "Carbon Microfinance Bank": "560", "FairMoney Microfinance Bank": "51314",
+            "RenMoney Microfinance Bank": "502", "VFD Microfinance Bank (VBank)": "566", "Hope PSB": "120001",
+            "Momo Payment Service Bank": "120003", "SmartCash PSB": "120004", "Money Master PSB": "120005",
+            "9 Payment Service Bank": "120002"
+        };
+
+        const banks = [
+            { name: "Access Bank PLC", category: "Commercial Banks" },
+            { name: "Citibank Nigeria Limited", category: "Commercial Banks" },
+            { name: "Ecobank Nigeria PLC", category: "Commercial Banks" },
+            { name: "Fidelity Bank PLC", category: "Commercial Banks" },
+            { name: "First Bank of Nigeria Limited", category: "Commercial Banks" },
+            { name: "First City Monument Bank PLC (FCMB)", category: "Commercial Banks" },
+            { name: "Globus Bank Limited", category: "Commercial Banks" },
+            { name: "Guaranty Trust Bank PLC (GTBank)", category: "Commercial Banks" },
+            { name: "Keystone Bank Limited", category: "Commercial Banks" },
+            { name: "Nova Commercial Bank Limited", category: "Commercial Banks" },
+            { name: "Optimus Bank", category: "Commercial Banks" },
+            { name: "Parallex Bank Limited", category: "Commercial Banks" },
+            { name: "Polaris Bank PLC", category: "Commercial Banks" },
+            { name: "PremiumTrust Bank", category: "Commercial Banks" },
+            { name: "Providus Bank Limited", category: "Commercial Banks" },
+            { name: "Signature Bank Limited", category: "Commercial Banks" },
+            { name: "Stanbic IBTC Bank PLC", category: "Commercial Banks" },
+            { name: "Standard Chartered Bank Nigeria Limited", category: "Commercial Banks" },
+            { name: "Sterling Bank PLC", category: "Commercial Banks" },
+            { name: "SunTrust Bank Nigeria Limited", category: "Commercial Banks" },
+            { name: "Taj Bank Limited", category: "Commercial Banks" },
+            { name: "Titan Trust Bank Limited", category: "Commercial Banks" },
+            { name: "Union Bank of Nigeria Plc", category: "Commercial Banks" },
+            { name: "United Bank for Africa Plc (UBA)", category: "Commercial Banks" },
+            { name: "Unity Bank PLC", category: "Commercial Banks" },
+            { name: "Wema Bank PLC", category: "Commercial Banks" },
+            { name: "Zenith Bank PLC", category: "Commercial Banks" },
+            { name: "Alpha Morgan Bank", category: "Commercial Banks" },
+            { name: "Heritage Banking Company Limited", category: "Commercial Banks" },
+            { name: "Lotus Bank", category: "Commercial Banks" },
+            { name: "Jaiz Bank PLC", category: "Commercial Banks" },
+            { name: "OPay Digital Services Limited", category: "Fintech/Mobile Money" },
+            { name: "PalmPay Limited", category: "Fintech/Mobile Money" },
+            { name: "Kuda Microfinance Bank", category: "Fintech/Mobile Money" },
+            { name: "Moniepoint Microfinance Bank", category: "Fintech/Mobile Money" },
+            { name: "Carbon Microfinance Bank", category: "Fintech/Mobile Money" },
+            { name: "FairMoney Microfinance Bank", category: "Fintech/Mobile Money" },
+            { name: "RenMoney Microfinance Bank", category: "Fintech/Mobile Money" },
+            { name: "VFD Microfinance Bank (VBank)", category: "Fintech/Mobile Money" },
+            { name: "Hope PSB", category: "Payment Service Banks" },
+            { name: "Momo Payment Service Bank", category: "Payment Service Banks" },
+            { name: "SmartCash PSB", category: "Payment Service Banks" },
+            { name: "Money Master PSB", category: "Payment Service Banks" },
+            { name: "9 Payment Service Bank", category: "Payment Service Banks" }
+        ];
+
+        let currentUser = null;
+        let userDocRef = null;
+        let unsubscribe = null;
+        let appRevealed = false;
+        let selectedBank = '';
+        let isVerifying = false;
+        let verifiedAccountName = '';
+
+        function hasLocalSession() {
+            return localStorage.getItem('pinkApp_loggedIn') === 'true';
+        }
+
+        function getLocalUid() {
+            return localStorage.getItem('pinkApp_uid') || null;
+        }
+
+        function revealApp() {
+            if (appRevealed) return;
+            appRevealed = true;
+            document.getElementById('authLoading').classList.add('hidden');
+            document.getElementById('appContainer').style.display = '';
+        }
+
+        function kickToLogin(reason) {
+            console.log('[Auth] Redirecting to login:', reason);
+            showError('Please log in first');
+            setTimeout(() => navigateTo('pink-login.html'), 1500);
+        }
+
+        // Cross-tab login detection
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'pinkApp_loggedIn' && e.newValue === 'true') {
+                console.log('[Auth] Login detected in another tab!');
+                location.reload();
+            }
+            if (e.key === 'pinkApp_loggedIn' && e.newValue !== 'true') {
+                console.log('[Auth] Logout detected in another tab!');
+                kickToLogin('Logged out in another tab');
+            }
+        });
+
+        const localUid = getLocalUid();
+
+        if (hasLocalSession() && localUid) {
+            console.log('[Auth] Local session found. UID:', localUid);
+            userDocRef = doc(db, 'users', localUid);
+            revealApp();
+            loadData();
+            setupRealtime();
+        } else {
+            console.log('[Auth] No local session. Waiting for Firebase...');
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            console.log('[Auth] Firebase state:', user ? 'LOGGED IN (' + user.uid + ')' : 'LOGGED OUT');
+
+            if (user) {
+                currentUser = user;
+                const uid = user.uid;
+                localStorage.setItem('pinkApp_loggedIn', 'true');
+                localStorage.setItem('pinkApp_uid', uid);
+
+                userDocRef = doc(db, 'users', uid);
+
+                if (!appRevealed) {
+                    revealApp();
+                    loadData();
+                    setupRealtime();
+                }
+            } else {
+                if (hasLocalSession()) {
+                    console.log('[Auth] Firebase null but localStorage says logged in. Clearing...');
+                    localStorage.removeItem('pinkApp_loggedIn');
+                    localStorage.removeItem('pinkApp_uid');
+                    localStorage.removeItem('pinkApp_userData');
+                    kickToLogin('Session expired');
+                } else if (!appRevealed) {
+                    kickToLogin('Not logged in');
+                }
+            }
+        });
+
+        setTimeout(() => {
+            if (!appRevealed) {
+                console.log('[Auth] Timeout: no session detected after 8s');
+                kickToLogin('Session check timed out');
+            }
+        }, 8000);
+
+        async function loadData() {
+            if (!userDocRef) return;
+            try {
+                const snap = await getDoc(userDocRef);
+                const data = snap.exists() ? snap.data() : {};
+                renderBanks(data.banks || []);
+                renderWallet(data);
+            } catch (e) {
+                console.error('Load error:', e);
+                showError('Failed to load payment data');
+            }
+        }
+
+        function setupRealtime() {
+            if (unsubscribe) unsubscribe();
+            unsubscribe = onSnapshot(userDocRef, (snap) => {
+                const data = snap.exists() ? snap.data() : {};
+                renderBanks(data.banks || []);
+                renderWallet(data);
+            });
+        }
+
+        function renderBanks(banksArr) {
+            const container = document.getElementById('banksList');
+            if (!banksArr || banksArr.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+                        </svg>
+                        <p>No bank accounts added yet</p>
+                    </div>`;
+                return;
+            }
+            container.innerHTML = banksArr.map((bank, idx) => `
+                <div class="bank-card">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <div class="bank-name">${escapeHtml(bank.bankName || 'Unknown Bank')}</div>
+                        ${bank.isDefault ? '<span class="status-badge default">Default</span>' : ''}
+                    </div>
+                    <div class="bank-number">${maskAccount(bank.accountNumber || '')}</div>
+                    <div class="bank-holder">${escapeHtml(bank.accountName || '')}</div>
+                    <div class="bank-actions">
+                        <button class="bank-action-btn" onclick="editBank(${idx})">Edit</button>
+                        <button class="bank-action-btn" onclick="setDefaultBank(${idx})">Default</button>
+                        <button class="bank-action-btn" style="color:var(--error)" onclick="removeBank(${idx})">Remove</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderWallet(data) {
+            const coins = data.coins || data.balance || 0;
+            const rate = data.conversionRate || 50;
+            const naira = (coins * rate).toLocaleString();
+            document.getElementById('walletBalance').textContent = `${coins.toLocaleString()} coins (~₦${naira})`;
+        }
+
+        function maskAccount(num) {
+            if (!num || num.length < 4) return '**** **** ****';
+            return num.slice(0, 4) + ' **** **** ' + num.slice(-4);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        async function verifyAccount(accountNumber, bankCode) {
+            try {
+                const response = await fetch(`${PAYSTACK_RESOLVE_URL}?account_number=${accountNumber}&bank_code=${bankCode}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${PAYSTACK_SECRET_KEY}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                if (data.status && data.data) {
+                    return { success: true, accountName: data.data.account_name };
+                } else {
+                    return { success: false, message: data.message || 'Account verification failed' };
+                }
+            } catch (error) {
+                console.error('Verification error:', error);
+                return { success: false, message: 'Network error. Please try again.' };
+            }
+        }
+
+        window.openBankPicker = function() {
+            document.getElementById('bankPickerModal').classList.add('active');
+            document.getElementById('bankSelectBtn').classList.add('active');
+            populateBankList();
+        };
+
+        window.closeBankPicker = function() {
+            document.getElementById('bankPickerModal').classList.remove('active');
+            document.getElementById('bankSelectBtn').classList.remove('active');
+        };
+
+        function populateBankList(filtered = banks) {
+            const list = document.getElementById('bankList');
+            list.innerHTML = '';
+            const categories = [...new Set(filtered.map(b => b.category))];
+            categories.forEach(cat => {
+                const catDiv = document.createElement('div');
+                catDiv.className = 'bank-category';
+                catDiv.textContent = cat;
+                list.appendChild(catDiv);
+                filtered.filter(b => b.category === cat).forEach(bank => {
+                    const opt = document.createElement('div');
+                    opt.className = 'bank-option';
+                    opt.textContent = bank.name;
+                    if (bank.name === selectedBank) opt.classList.add('selected');
+                    opt.onclick = () => selectBankOption(bank.name);
+                    list.appendChild(opt);
+                });
+            });
+        }
+
+        window.filterBankList = function() {
+            const term = document.getElementById('bankSearch').value.toLowerCase();
+            const filtered = banks.filter(b => b.name.toLowerCase().includes(term));
+            populateBankList(filtered);
+        };
+
+        function selectBankOption(name) {
+            selectedBank = name;
+            document.getElementById('bankSelectText').textContent = name;
+            document.getElementById('bankSelectBtn').classList.remove('placeholder');
+            closeBankPicker();
+            const accNum = document.getElementById('bankAccNumber').value;
+            if (accNum.length === 10 && bankCodes[name]) {
+                performPaystackVerify(accNum, bankCodes[name]);
+            }
+        }
+
+        window.onAccountInput = function(input) {
+            input.value = input.value.replace(/[^0-9]/g, '');
+            const len = input.value.length;
+            document.getElementById('accCounter').textContent = `${len}/10`;
+            document.getElementById('accCounter').classList.toggle('complete', len === 10);
+            document.getElementById('bankAccName').value = '';
+            document.getElementById('bankAccName').classList.remove('verified', 'error');
+            document.getElementById('accVerifyStatus').style.display = 'none';
+            verifiedAccountName = '';
+            if (len === 10 && selectedBank && bankCodes[selectedBank]) {
+                setTimeout(() => performPaystackVerify(input.value, bankCodes[selectedBank]), 400);
+            }
+        };
+
+        async function performPaystackVerify(accountNumber, bankCode) {
+            if (isVerifying) return;
+            const nameField = document.getElementById('bankAccName');
+            const status = document.getElementById('accVerifyStatus');
+            const spinner = document.getElementById('accSpinner');
+            isVerifying = true;
+            spinner.classList.add('show');
+            nameField.placeholder = 'Verifying...';
+            status.style.display = 'none';
+            const result = await verifyAccount(accountNumber, bankCode);
+            spinner.classList.remove('show');
+            isVerifying = false;
+            if (result.success) {
+                nameField.value = result.accountName;
+                nameField.classList.add('verified');
+                verifiedAccountName = result.accountName;
+                status.innerHTML = '<span style="font-size:1rem;">✓</span> Account verified by Paystack';
+                status.className = 'verify-status success';
+                status.style.display = 'flex';
+                showSuccess('Account verified');
+            } else {
+                nameField.value = '';
+                nameField.placeholder = 'Verification failed';
+                nameField.classList.add('error');
+                verifiedAccountName = '';
+                status.innerHTML = '<span style="font-size:1rem;">✗</span> ' + result.message;
+                status.className = 'verify-status error';
+                status.style.display = 'flex';
+                showError(result.message);
+            }
+        }
+
+        window.openAddBankModal = function() {
+            selectedBank = '';
+            verifiedAccountName = '';
+            document.getElementById('bankAccNumber').value = '';
+            document.getElementById('bankAccName').value = '';
+            document.getElementById('bankAccName').classList.remove('verified', 'error');
+            document.getElementById('bankSelectText').textContent = 'Select Bank';
+            document.getElementById('bankSelectBtn').classList.add('placeholder');
+            document.getElementById('accCounter').textContent = '0/10';
+            document.getElementById('accCounter').classList.remove('complete');
+            document.getElementById('accVerifyStatus').style.display = 'none';
+            document.getElementById('addBankBtn').textContent = 'Verify & Add Account';
+            document.getElementById('addBankBtn').disabled = false;
+            document.getElementById('addBankModal').classList.add('active');
+        };
+
+        window.closeModal = function(id) {
+            document.getElementById(id).classList.remove('active');
+        };
+
+        window.addBank = async function() {
+            const number = document.getElementById('bankAccNumber').value.trim();
+            const accName = document.getElementById('bankAccName').value.trim();
+            const btn = document.getElementById('addBankBtn');
+
+            if (!number || number.length !== 10) { showError('Enter a valid 10-digit account number'); return; }
+            if (!selectedBank) { showError('Select a bank'); return; }
+            if (!accName || !verifiedAccountName) { showError('Wait for Paystack verification or verify failed'); return; }
+
+            btn.disabled = true;
+            btn.textContent = 'Adding...';
+            try {
+                const snap = await getDoc(userDocRef);
+                const data = snap.exists() ? snap.data() : {};
+                const banksArr = data.banks || [];
+                const isDefault = banksArr.length === 0;
+                banksArr.push({
+                    bankName: selectedBank,
+                    accountNumber: number,
+                    accountName: verifiedAccountName,
+                    isDefault: isDefault,
+                    addedAt: new Date().toISOString(),
+                    verifiedBy: 'Paystack'
+                });
+                await updateDoc(userDocRef, { banks: banksArr });
+                closeModal('addBankModal');
+                showSuccess('Bank account added & verified');
+            } catch (e) {
+                showError('Failed to add bank: ' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Verify & Add Account';
+            }
+        };
+
+        window.removeBank = async function(idx) {
+            if (!confirm('Remove this bank account?')) return;
+            try {
+                const snap = await getDoc(userDocRef);
+                const data = snap.exists() ? snap.data() : {};
+                const banksArr = data.banks || [];
+                const wasDefault = banksArr[idx]?.isDefault;
+                banksArr.splice(idx, 1);
+                if (wasDefault && banksArr.length > 0) banksArr[0].isDefault = true;
+                await updateDoc(userDocRef, { banks: banksArr });
+                showSuccess('Bank account removed');
+            } catch (e) {
+                showError('Failed to remove bank');
+            }
+        };
+
+        window.setDefaultBank = async function(idx) {
+            try {
+                const snap = await getDoc(userDocRef);
+                const data = snap.exists() ? snap.data() : {};
+                const banksArr = data.banks || [];
+                if (banksArr[idx]) {
+                    banksArr.forEach((b, i) => b.isDefault = (i === idx));
+                    await updateDoc(userDocRef, { banks: banksArr });
+                    showSuccess('Default bank updated');
+                }
+            } catch (e) {
+                showError('Failed to update default');
+            }
+        };
+
+        window.editBank = async function(idx) {
+            const snap = await getDoc(userDocRef);
+            const data = snap.exists() ? snap.data() : {};
+            const banksArr = data.banks || [];
+            const bank = banksArr[idx];
+            if (!bank) return;
+            const newName = prompt('Bank Name:', bank.bankName);
+            if (newName === null) return;
+            const newNum = prompt('Account Number:', bank.accountNumber);
+            if (newNum === null) return;
+            const newAcc = prompt('Account Name:', bank.accountName);
+            if (newAcc === null) return;
+            banksArr[idx] = { ...bank, bankName: newName.trim(), accountNumber: newNum.trim(), accountName: newAcc.trim() };
+            await updateDoc(userDocRef, { banks: banksArr });
+            showSuccess('Bank account updated');
+        };
+    </script>
+</body>
+</html>
