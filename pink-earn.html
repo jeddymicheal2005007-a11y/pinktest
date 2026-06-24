@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#07070a">
+<title>Earn Center — Pink App</title>
+<style>
+:root{
+  --pink:#fe2c55;
+  --pink-400:#ff6b8a;
+  --pink-600:#d91a3c;
+  --cyan:#25f4ee;
+  --gold:#ffd700;
+  --gold-400:#ffaa00;
+  --bg:#07070a;
+  --glass:rgba(255,255,255,.06);
+  --glass-border:rgba(255,255,255,.1);
+  --spring:cubic-bezier(0.23,1,0.32,1);
+  --ease-out:cubic-bezier(0.16,1,0.3,1);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  background:var(--bg);
+  color:#fff;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif;
+  min-height:100vh;
+  padding-bottom:100px;
+  overflow-x:hidden;
+  position:relative;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ===== AMBIENT ORBS ===== */
+.orb{
+  position:fixed;
+  border-radius:50%;
+  filter:blur(120px);
+  pointer-events:none;
+  z-index:0;
+  opacity:.18;
+}
+.orb-1{width:500px;height:500px;background:var(--pink);top:-200px;left:-150px;animation:orbBreathe 14s ease-in-out infinite}
+.orb-2{width:400px;height:400px;background:var(--cyan);bottom:0;right:-120px;animation:orbBreathe 18s ease-in-out infinite 4s;opacity:.12}
+.orb-3{width:350px;height:350px;background:var(--gold);top:45%;left:35%;animation:orbBreathe 12s ease-in-out infinite 8s;opacity:.08}
+@keyframes orbBreathe{
+  0%,100%{transform:translate(0,0) scale(1);opacity:.18}
+  33%{transform:translate(50px,-40px) scale(1.2);opacity:.28}
+  66%{transform:translate(-30px,30px) scale(.9);opacity:.15}
+}
+
+/* ===== PARTICLE DUST ===== */
+.dust{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+.dust-particle{
+  position:absolute;
+  width:2px;height:2px;
+  background:rgba(254,44,85,.35);
+  border-radius:50%;
+  animation:floatDust linear infinite;
+}
+@keyframes floatDust{
+  0%{transform:translateY(100vh) rotate(0deg);opacity:0}
+  10%{opacity:1}
+  90%{opacity:1}
+  100%{transform:translateY(-10vh) rotate(720deg);opacity:0}
+}
+
+/* ===== HEADER ===== */
+.header{
+  position:sticky;
+  top:0;
+  z-index:50;
+  padding:16px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:rgba(7,7,10,.92);
+  backdrop-filter:blur(40px) saturate(180%);
+  -webkit-backdrop-filter:blur(40px) saturate(180%);
+  border-bottom:1px solid rgba(255,255,255,.06);
+  animation:slideDown .6s var(--ease-out);
+}
+@keyframes slideDown{from{transform:translateY(-100%);opacity:0}}
+.header-title{
+  font-size:22px;
+  font-weight:800;
+  letter-spacing:-.6px;
+  background:linear-gradient(135deg,#fff 20%,var(--pink-400));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+/* ===== COIN BADGE ===== */
+.coin-badge{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:linear-gradient(135deg,rgba(254,44,85,.15),rgba(255,215,0,.08));
+  border:1.5px solid rgba(254,44,85,.25);
+  padding:7px 16px 7px 10px;
+  border-radius:50px;
+  font-weight:800;
+  font-size:15px;
+  color:var(--pink);
+  animation:pulseGlow 3s ease-in-out infinite;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+}
+.coin-badge::before{
+  content:'';
+  position:absolute;
+  top:0;left:-100%;
+  width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);
+  animation:shine 4s ease-in-out infinite;
+}
+@keyframes shine{
+  0%{left:-100%}
+  50%,100%{left:100%}
+}
+@keyframes pulseGlow{
+  0%,100%{box-shadow:0 0 0 0 rgba(254,44,85,.15), inset 0 1px 0 rgba(255,255,255,.1)}
+  50%{box-shadow:0 0 25px rgba(254,44,85,.25), inset 0 1px 0 rgba(255,255,255,.15)}
+}
+
+/* Coin icon */
+.coin-icon{
+  width:28px;height:28px;
+  border-radius:50%;
+  background:linear-gradient(145deg,#ffd700,#e09000);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 2px 10px rgba(255,184,0,.4), inset 0 1px 0 rgba(255,255,255,.4);
+  border:2px solid rgba(255,255,255,.2);
+  flex-shrink:0;
+  animation:coinRotate 5s ease-in-out infinite;
+  position:relative;
+  overflow:hidden;
+}
+.coin-icon::before{
+  content:'';
+  position:absolute;
+  top:2px;left:4px;right:4px;height:6px;
+  background:rgba(255,255,255,.4);
+  border-radius:50%;
+  filter:blur(1px);
+}
+.coin-icon svg{width:14px;height:14px;color:rgba(0,0,0,0.7);stroke-width:2.2;position:relative;z-index:1;}
+@keyframes coinRotate{
+  0%,100%{transform:rotateY(0deg) scale(1)}
+  25%{transform:rotateY(25deg) scale(1.06)}
+  75%{transform:rotateY(-25deg) scale(1.06)}
+}
+
+/* ===== CONTAINER ===== */
+.container{position:relative;z-index:10;padding:20px;max-width:480px;margin:0 auto}
+
+/* ===== LIVE EARNERS STRIP ===== */
+.live-strip{
+  background:linear-gradient(135deg,rgba(37,244,238,.06),rgba(255,255,255,.02));
+  border:1px solid rgba(37,244,238,.12);
+  border-radius:16px;
+  padding:12px 16px;
+  margin-bottom:22px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  overflow:hidden;
+  animation:fadeUp .6s .1s var(--ease-out) both;
+  transition:all .3s;
+  position:relative;
+}
+.live-strip:hover{border-color:rgba(37,244,238,.2)}
+.live-dot{
+  width:9px;height:9px;
+  background:var(--cyan);
+  border-radius:50%;
+  position:relative;
+  flex-shrink:0;
+  box-shadow:0 0 8px rgba(37,244,238,.4);
+}
+.live-dot::after{
+  content:'';
+  position:absolute;
+  inset:-5px;
+  border-radius:50%;
+  border:2px solid var(--cyan);
+  animation:liveRing 2s infinite;
+}
+@keyframes liveRing{
+  0%{transform:scale(1);opacity:1}
+  100%{transform:scale(2.8);opacity:0}
+}
+.live-text{
+  font-size:13px;
+  color:rgba(255,255,255,.55);
+  white-space:nowrap;
+  overflow:hidden;
+  transition:opacity .3s;
+  font-weight:500;
+  letter-spacing:.2px;
+}
+.live-text .name{color:#fff;font-weight:700}
+.live-text .country{color:var(--cyan);font-weight:600;font-size:11px;opacity:.9}
+.live-text .amount{color:var(--gold);font-weight:800;font-size:14px}
+.live-text .source{color:rgba(255,255,255,.4);font-weight:500}
+
+/* ===== WELCOME CARD ===== */
+.welcome-card{
+  padding:32px 26px;
+  margin-bottom:26px;
+  position:relative;
+  overflow:hidden;
+  animation:fadeUp .6s .15s var(--ease-out) both;
+}
+.welcome-card::before{
+  content:'';
+  position:absolute;
+  top:-60%;right:-25%;
+  width:300px;height:300px;
+  background:radial-gradient(circle,rgba(254,44,85,.12),transparent 70%);
+  border-radius:50%;
+  animation:shimmerRotate 10s linear infinite;
+}
+@keyframes shimmerRotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.welcome-card h2{
+  font-size:26px;
+  font-weight:800;
+  margin-bottom:12px;
+  background:linear-gradient(135deg,#fff 20%,var(--pink-400));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  position:relative;
+  letter-spacing:-.5px;
+  line-height:1.2;
+}
+.welcome-card p{
+  color:rgba(255,255,255,.45);
+  font-size:14.5px;
+  line-height:1.7;
+  position:relative;
+  font-weight:400;
+  max-width:90%;
+}
+
+/* ===== ROUTE CARDS ===== */
+.routes-grid{display:flex;flex-direction:column;gap:14px;margin-bottom:28px}
+.route-card{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  padding:22px 20px;
+  text-decoration:none;
+  color:#fff;
+  transition:all .4s var(--spring);
+  position:relative;
+  overflow:hidden;
+  background:var(--glass);
+  backdrop-filter:blur(24px);
+  -webkit-backdrop-filter:blur(24px);
+  border:1px solid var(--glass-border);
+  border-radius:20px;
+  animation:fadeUp .6s .2s var(--ease-out) both;
+  cursor:pointer;
+}
+.route-card::before{
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;
+  height:2px;
+  background:linear-gradient(90deg,transparent,var(--route-color),transparent);
+  opacity:0;
+  transition:opacity .3s;
+}
+.route-card::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.04),transparent);
+  opacity:0;
+  transition:opacity .3s;
+}
+.route-card:hover::before,.route-card:hover::after{opacity:1}
+.route-card:active{transform:scale(.97)}
+.route-icon{
+  width:54px;height:54px;
+  border-radius:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  box-shadow:0 8px 32px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.06);
+  position:relative;
+  z-index:2;
+  transition:transform .3s var(--spring);
+}
+.route-card:hover .route-icon{transform:scale(1.1) rotate(-5deg)}
+.route-icon svg{width:24px;height:24px;stroke-width:2}
+.route-info{flex:1;min-width:0;position:relative;z-index:2}
+.route-info h3{font-size:17px;font-weight:700;margin-bottom:6px;letter-spacing:-.3px}
+.route-info p{font-size:13px;color:rgba(255,255,255,.45);line-height:1.55;margin-bottom:12px}
+.route-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.route-tag{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:5px 11px;
+  border-radius:10px;
+  font-size:11px;
+  font-weight:700;
+  background:rgba(255,215,0,.1);
+  color:var(--gold);
+  border:1px solid rgba(255,215,0,.2);
+  backdrop-filter:blur(10px);
+  letter-spacing:.3px;
+}
+.route-tag svg{width:11px;height:11px;stroke-width:2.2}
+.route-tag.cyan{background:rgba(37,244,238,.1);color:var(--cyan);border-color:rgba(37,244,238,.2)}
+.route-tag.pink{background:rgba(254,44,85,.1);color:var(--pink);border-color:rgba(254,44,85,.2)}
+.route-arrow{
+  width:34px;height:34px;
+  border-radius:50%;
+  background:rgba(255,255,255,.05);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:rgba(255,255,255,.3);
+  transition:all .3s var(--spring);
+  flex-shrink:0;
+  border:1px solid rgba(255,255,255,.06);
+}
+.route-card:hover .route-arrow{
+  background:rgba(254,44,85,.2);
+  color:var(--pink);
+  transform:translateX(4px);
+  border-color:rgba(254,44,85,.15);
+}
+
+/* ===== STATS ROW ===== */
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:26px}
+.stat-card{
+  padding:24px 16px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+  background:var(--glass);
+  backdrop-filter:blur(24px);
+  -webkit-backdrop-filter:blur(24px);
+  border:1px solid var(--glass-border);
+  border-radius:20px;
+  transition:all .3s var(--spring);
+  animation:fadeUp .6s .25s var(--ease-out) both;
+}
+.stat-card:hover{border-color:rgba(254,44,85,.2);transform:translateY(-3px)}
+.stat-card::before{
+  content:'';
+  position:absolute;
+  top:0;left:50%;
+  transform:translateX(-50%);
+  width:60%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);
+}
+.stat-value{
+  font-size:30px;
+  font-weight:800;
+  margin-bottom:6px;
+  background:linear-gradient(135deg,#fff,var(--pink-400));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-1px;
+}
+.stat-label{
+  font-size:11px;
+  color:rgba(255,255,255,.35);
+  text-transform:uppercase;
+  letter-spacing:1.5px;
+  font-weight:700;
+}
+
+/* ===== TRUST BAR ===== */
+.trust-bar{
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  padding:18px 14px;
+  flex-wrap:wrap;
+  margin-bottom:22px;
+  animation:fadeUp .6s .3s var(--ease-out) both;
+}
+.trust-item{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:11px;
+  color:rgba(255,255,255,.3);
+  font-weight:600;
+  padding:7px 14px;
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:12px;
+  transition:all .3s;
+  letter-spacing:.2px;
+}
+.trust-item:hover{color:rgba(255,255,255,.6);border-color:rgba(255,255,255,.12);background:rgba(255,255,255,.05)}
+.trust-item svg{width:13px;height:13px;stroke-width:2}
+
+/* ===== RECENT ACTIVITY ===== */
+.recent-section{margin-top:8px;animation:fadeUp .6s .35s var(--ease-out) both}
+.section-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:16px;
+}
+.section-header h3{font-size:17px;font-weight:700;letter-spacing:-.3px}
+.section-header a{
+  color:var(--pink);
+  font-size:13px;
+  text-decoration:none;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  gap:4px;
+  transition:opacity .2s;
+  letter-spacing:.2px;
+}
+.section-header a:hover{opacity:.7}
+.activity-list{display:flex;flex-direction:column;gap:10px}
+.activity-item{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:16px;
+  background:rgba(255,255,255,.04);
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.05);
+  transition:all .3s var(--spring);
+  position:relative;
+  overflow:hidden;
+}
+.activity-item:hover{
+  background:rgba(255,255,255,.06);
+  border-color:rgba(255,255,255,.08);
+  transform:translateX(5px);
+}
+.activity-icon{
+  width:42px;height:42px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  box-shadow:0 4px 12px rgba(0,0,0,.2);
+}
+.activity-info{flex:1}
+.activity-info .title{font-size:14.5px;font-weight:600;margin-bottom:3px;letter-spacing:-.2px}
+.activity-info .time{font-size:12px;color:rgba(255,255,255,.35);font-weight:500}
+.activity-amount{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.3px}
+.empty-state{
+  text-align:center;
+  padding:48px 20px;
+  color:rgba(255,255,255,.3);
+  font-size:14px;
+  font-weight:500;
+}
+.empty-state svg{width:52px;height:52px;margin-bottom:18px;opacity:.25;stroke-width:1.5}
+
+/* ===== BOTTOM NAV ===== */
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  left:0;right:0;
+  max-width:480px;
+  margin:0 auto;
+  height:76px;
+  background:rgba(7,7,10,.95);
+  backdrop-filter:blur(40px) saturate(180%);
+  -webkit-backdrop-filter:blur(40px) saturate(180%);
+  border-top:1px solid rgba(255,255,255,.06);
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  z-index:100;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.nav-item{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  color:rgba(255,255,255,.35);
+  text-decoration:none;
+  font-size:10.5px;
+  font-weight:700;
+  cursor:pointer;
+  transition:all .3s var(--spring);
+  padding:8px 14px;
+  border-radius:14px;
+  border:none;
+  background:none;
+  position:relative;
+}
+.nav-item::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  border-radius:14px;
+  background:linear-gradient(135deg,rgba(254,44,85,.12),transparent);
+  opacity:0;
+  transition:opacity .3s;
+}
+.nav-item:hover::before{opacity:1}
+.nav-item svg{width:22px;height:22px;stroke-width:1.8;transition:all .3s;position:relative;z-index:1}
+.nav-item.active{color:var(--pink)}
+.nav-item.active::before{opacity:1}
+.nav-item.active svg{
+  stroke-width:2.2;
+  filter:drop-shadow(0 0 10px rgba(254,44,85,.5));
+  animation:navBounce .5s var(--spring);
+}
+@keyframes navBounce{0%{transform:scale(.8)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+
+/* ===== SPINNER ===== */
+.spinner-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(7,7,10,.97);
+  backdrop-filter:blur(30px);
+  -webkit-backdrop-filter:blur(30px);
+  z-index:3000;
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:24px;
+}
+.spinner-overlay.active{display:flex}
+.spinner-ring{width:56px;height:56px;position:relative}
+.spinner-ring::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  border-radius:50%;
+  border:3px solid transparent;
+  border-top-color:var(--pink);
+  border-right-color:var(--pink-400);
+  animation:spin .8s linear infinite;
+}
+.spinner-ring::after{
+  content:'';
+  position:absolute;
+  inset:8px;
+  border-radius:50%;
+  border:3px solid transparent;
+  border-bottom-color:var(--cyan);
+  border-left-color:var(--gold);
+  animation:spin 1.2s linear infinite reverse;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner-text{color:rgba(255,255,255,.5);font-size:14px;font-weight:500;letter-spacing:.5px}
+.spinner-sub{font-size:12px;color:rgba(255,255,255,.25);margin-top:-16px}
+
+/* ===== UTILS ===== */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.glass{
+  background:var(--glass);
+  backdrop-filter:blur(24px);
+  -webkit-backdrop-filter:blur(24px);
+  border:1px solid var(--glass-border);
+  border-radius:20px;
+}
+::-webkit-scrollbar{width:0;height:0}
+</style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<div class="dust" id="dustContainer"></div>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-title">Earn Center</div>
+  <div class="coin-badge" id="coinDisplay">
+    <div class="coin-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="3 10 12 3 21 10"/>
+        <line x1="6" y1="10" x2="6" y2="18"/>
+        <line x1="12" y1="10" x2="12" y2="18"/>
+        <line x1="18" y1="10" x2="18" y2="18"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+        <line x1="2" y1="21" x2="22" y2="21"/>
+      </svg>
+    </div>
+    <span id="coinValue">0</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Live Earners Strip -->
+  <div class="live-strip" id="liveStrip">
+    <div class="live-dot"></div>
+    <div class="live-text" id="liveText">
+      <span class="name">Adaeze</span> from <span class="country">Nigeria</span> earned <span class="amount">+450 coins</span> <span class="source">watching videos</span>
+    </div>
+  </div>
+
+  <!-- Welcome -->
+  <div class="welcome-card glass">
+    <h2>How will you earn today?</h2>
+    <p>Choose from verified earning methods. Trusted by 50,000+ active users across Africa.</p>
+  </div>
+
+  <!-- Routes -->
+  <div class="routes-grid">
+    <div class="route-card" style="--route-color:#fe2c55" onclick="navigateTo('pink-watch.html')">
+      <div class="route-icon" style="background:linear-gradient(135deg,#fe2c55,#ff6b8a)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      </div>
+      <div class="route-info">
+        <h3>Watch Videos</h3>
+        <p>Earn up to 500 coins daily watching curated premium content</p>
+        <div class="route-meta">
+          <span class="route-tag">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            Most Popular
+          </span>
+          <span class="route-tag cyan">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Live Now
+          </span>
+        </div>
+      </div>
+      <div class="route-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+
+    <div class="route-card" style="--route-color:#25f4ee" onclick="navigateTo('pink-survey.html')">
+      <div class="route-icon" style="background:linear-gradient(135deg,#25f4ee,#00b4d8)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      </div>
+      <div class="route-info">
+        <h3>Daily Surveys</h3>
+        <p>Earn 50 coins per completed survey. 1,200+ questions available.</p>
+        <div class="route-meta">
+          <span class="route-tag">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            1,200+ Questions
+          </span>
+        </div>
+      </div>
+      <div class="route-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+
+    <div class="route-card" style="--route-color:#ffd700" onclick="navigateTo('pink-referral.html')">
+      <div class="route-icon" style="background:linear-gradient(135deg,#ffd700,#ffb700)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div class="route-info">
+        <h3>Refer & Earn</h3>
+        <p>Earn 100 coins per friend + lifetime bonus tiers</p>
+        <div class="route-meta">
+          <span class="route-tag">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            Passive Income
+          </span>
+        </div>
+      </div>
+      <div class="route-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-value" id="todayEarn">0</div>
+      <div class="stat-label">Today's Coins</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="streakDisplay">0</div>
+      <div class="stat-label">Day Streak</div>
+    </div>
+  </div>
+
+  <!-- Trust -->
+  <div class="trust-bar">
+    <div class="trust-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Bank-Grade Secure
+    </div>
+    <div class="trust-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      Instant Credit
+    </div>
+    <div class="trust-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      Verified Network
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="recent-section">
+    <div class="section-header">
+      <h3>Recent Activity</h3>
+      <a href="#" onclick="navigateTo('pink-history.html');return false;">View All →</a>
+    </div>
+    <div class="activity-list" id="activityList">
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+        <div>No activity yet today. Start earning now.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Nav -->
+<div class="bottom-nav">
+  <div class="nav-item" onclick="navigateTo('pink-dashboard.html')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span>Home</span>
+  </div>
+  <div class="nav-item active" onclick="navigateTo('pink-watch.html')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    <span>Earn</span>
+  </div>
+  <div class="nav-item" onclick="navigateTo('pink-survey.html')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    <span>Surveys</span>
+  </div>
+  <div class="nav-item" onclick="navigateTo('pink-daily.html')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span>Rewards</span>
+  </div>
+  <div class="nav-item" onclick="navigateTo('pink-profile.html')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span>Profile</span>
+  </div>
+</div>
+
+<!-- Spinner -->
+<div class="spinner-overlay" id="spinnerOverlay">
+  <div class="spinner-ring"></div>
+  <div class="spinner-text">Loading secure session...</div>
+  <div class="spinner-sub">Please wait</div>
+</div>
+<script>(function(){let spinnerTimeout=null;function hideSpinner(){const e=document.getElementById('spinnerOverlay');if(e){e.classList.remove('active');e.style.display='none'}if(spinnerTimeout){clearTimeout(spinnerTimeout);spinnerTimeout=null}}function showSpinner(){const e=document.getElementById('spinnerOverlay');if(!e)return;e.style.display='flex';e.classList.add('active');if(spinnerTimeout)clearTimeout(spinnerTimeout);spinnerTimeout=setTimeout(hideSpinner,8000)}document.addEventListener('visibilitychange',()=>{if(document.hidden)hideSpinner()});window.addEventListener('beforeunload',hideSpinner);window.addEventListener('pagehide',hideSpinner);window.addEventListener('popstate',hideSpinner);window.addEventListener('hashchange',hideSpinner);document.addEventListener('touchstart',()=>{const e=document.getElementById('spinnerOverlay');if(e&&e.classList.contains('active'))setTimeout(hideSpinner,3000)},{passive:true});window.addEventListener('load',hideSpinner);document.addEventListener('DOMContentLoaded',hideSpinner);const origBack=history.back;history.back=function(){hideSpinner();return origBack.apply(this,arguments)};window.pinkShowSpinner=showSpinner;window.pinkHideSpinner=hideSpinner;})();</script>
+
+<script>
+// ===== PARTICLE DUST =====
+(function(){
+  var c=document.getElementById('dustContainer');
+  for(var i=0;i<24;i++){
+    var p=document.createElement('div');
+    p.className='dust-particle';
+    p.style.left=Math.random()*100+'%';
+    p.style.animationDuration=(10+Math.random()*14)+'s';
+    p.style.animationDelay=Math.random()*12+'s';
+    p.style.width=p.style.height=(1+Math.random()*2)+'px';
+    c.appendChild(p);
+  }
+})();
+
+// ===== AFRICAN EARNERS DATABASE — ALL 54 COUNTRIES =====
+var AFRICAN_EARNERS=[
+  {name:"Adaeze",country:"Nigeria"},{name:"Babatunde",country:"Nigeria"},{name:"Chidinma",country:"Nigeria"},{name:"Emeka",country:"Nigeria"},{name:"Funke",country:"Nigeria"},{name:"Gbenga",country:"Nigeria"},{name:"Halima",country:"Nigeria"},{name:"Ifeoma",country:"Nigeria"},{name:"Chuka",country:"Nigeria"},{name:"Amaka",country:"Nigeria"},{name:"Obinna",country:"Nigeria"},{name:"Ngozi",country:"Nigeria"},{name:"Yakubu",country:"Nigeria"},{name:"Amina",country:"Nigeria"},{name:"Tunde",country:"Nigeria"},{name:"Zainab",country:"Nigeria"},{name:"Kelechi",country:"Nigeria"},{name:"Folake",country:"Nigeria"},{name:"Ibrahim",country:"Nigeria"},{name:"Chioma",country:"Nigeria"},
+  {name:"Kwame",country:"Ghana"},{name:"Akosua",country:"Ghana"},{name:"Kofi",country:"Ghana"},{name:"Abena",country:"Ghana"},{name:"Yaw",country:"Ghana"},{name:"Afia",country:"Ghana"},{name:"Kwesi",country:"Ghana"},{name:"Efua",country:"Ghana"},{name:"Kwabena",country:"Ghana"},{name:"Adjoa",country:"Ghana"},{name:"Kweku",country:"Ghana"},{name:"Mawusi",country:"Ghana"},{name:"Papa",country:"Ghana"},{name:"Linda",country:"Ghana"},{name:"Nana",country:"Ghana"},{name:"Ama",country:"Ghana"},{name:"Ebenezer",country:"Ghana"},{name:"Serwaa",country:"Ghana"},{name:"Felix",country:"Ghana"},{name:"Gifty",country:"Ghana"},
+  {name:"Wanjiru",country:"Kenya"},{name:"Kamau",country:"Kenya"},{name:"Achieng",country:"Kenya"},{name:"Otieno",country:"Kenya"},{name:"Wanjiku",country:"Kenya"},{name:"Mwangi",country:"Kenya"},{name:"Naliaka",country:"Kenya"},{name:"Kipchoge",country:"Kenya"},{name:"Wambui",country:"Kenya"},{name:"Omondi",country:"Kenya"},{name:"Njeri",country:"Kenya"},{name:"Kibet",country:"Kenya"},{name:"Akinyi",country:"Kenya"},{name:"Mutua",country:"Kenya"},{name:"Wangari",country:"Kenya"},{name:"Kiprotich",country:"Kenya"},{name:"Amina",country:"Kenya"},{name:"Ochieng",country:"Kenya"},{name:"Muthoni",country:"Kenya"},{name:"Kiptoo",country:"Kenya"},
+  {name:"Thabo",country:"South Africa"},{name:"Lerato",country:"South Africa"},{name:"Sipho",country:"South Africa"},{name:"Nomsa",country:"South Africa"},{name:"Bongani",country:"South Africa"},{name:"Palesa",country:"South Africa"},{name:"Mandla",country:"South Africa"},{name:"Thandi",country:"South Africa"},{name:"Jabu",country:"South Africa"},{name:"Zanele",country:"South Africa"},{name:"Sibusiso",country:"South Africa"},{name:"Refilwe",country:"South Africa"},{name:"Kagiso",country:"South Africa"},{name:"Dineo",country:"South Africa"},{name:"Tshepo",country:"South Africa"},{name:"Kgosi",country:"South Africa"},{name:"Nomvula",country:"South Africa"},{name:"Bheki",country:"South Africa"},{name:"Mpho",country:"South Africa"},{name:"Ayanda",country:"South Africa"},
+  {name:"Dawit",country:"Ethiopia"},{name:"Hiwot",country:"Ethiopia"},{name:"Yonas",country:"Ethiopia"},{name:"Selam",country:"Ethiopia"},{name:"Tadesse",country:"Ethiopia"},{name:"Abeba",country:"Ethiopia"},{name:"Gemechu",country:"Ethiopia"},{name:"Fikir",country:"Ethiopia"},{name:"Kebede",country:"Ethiopia"},{name:"Tigist",country:"Ethiopia"},{name:"Bereket",country:"Ethiopia"},{name:"Meseret",country:"Ethiopia"},{name:"Alemayehu",country:"Ethiopia"},{name:"Meron",country:"Ethiopia"},{name:"Tewodros",country:"Ethiopia"},{name:"Hanna",country:"Ethiopia"},{name:"Bekele",country:"Ethiopia"},{name:"Rahel",country:"Ethiopia"},{name:"Assefa",country:"Ethiopia"},{name:"Worku",country:"Ethiopia"},
+  {name:"Juma",country:"Tanzania"},{name:"Mwanaidi",country:"Tanzania"},{name:"Baraka",country:"Tanzania"},{name:"Fatuma",country:"Tanzania"},{name:"Saidi",country:"Tanzania"},{name:"Asha",country:"Tanzania"},{name:"Moshi",country:"Tanzania"},{name:"Zawadi",country:"Tanzania"},{name:"Hamisi",country:"Tanzania"},{name:"Rehema",country:"Tanzania"},{name:"Nuru",country:"Tanzania"},{name:"Mariam",country:"Tanzania"},{name:"Rajabu",country:"Tanzania"},{name:"Salma",country:"Tanzania"},{name:"Kassim",country:"Tanzania"},{name:"Mwanajuma",country:"Tanzania"},{name:"Omari",country:"Tanzania"},{name:"Bahati",country:"Tanzania"},{name:"Juma",country:"Tanzania"},{name:"Amina",country:"Tanzania"},
+  {name:"Okello",country:"Uganda"},{name:"Nakato",country:"Uganda"},{name:"Odoi",country:"Uganda"},{name:"Nalwoga",country:"Uganda"},{name:"Mugisha",country:"Uganda"},{name:"Kirabo",country:"Uganda"},{name:"Ssempala",country:"Uganda"},{name:"Nambi",country:"Uganda"},{name:"Kizito",country:"Uganda"},{name:"Nakawesi",country:"Uganda"},{name:"Otim",country:"Uganda"},{name:"Nabirye",country:"Uganda"},{name:"Lwanga",country:"Uganda"},{name:"Namuli",country:"Uganda"},{name:"Kato",country:"Uganda"},{name:"Nakato",country:"Uganda"},{name:"Bwire",country:"Uganda"},{name:"Nantongo",country:"Uganda"},{name:"Muwonge",country:"Uganda"},{name:"Nankya",country:"Uganda"},
+  {name:"Amadou",country:"Senegal"},{name:"Aminata",country:"Senegal"},{name:"Moussa",country:"Senegal"},{name:"Fatou",country:"Senegal"},{name:"Ibrahima",country:"Senegal"},{name:"Ndeye",country:"Senegal"},{name:"Ousmane",country:"Senegal"},{name:"Mame",country:"Senegal"},{name:"Cheikh",country:"Senegal"},{name:"Sokhna",country:"Senegal"},{name:"Babacar",country:"Senegal"},{name:"Awa",country:"Senegal"},{name:"Alioune",country:"Senegal"},{name:"Mariama",country:"Senegal"},{name:"Mamadou",country:"Senegal"},{name:"Coumba",country:"Senegal"},{name:"Abdoulaye",country:"Senegal"},{name:"Khady",country:"Senegal"},{name:"Pape",country:"Senegal"},{name:"Ngoné",country:"Senegal"},
+  {name:"Jean",country:"Cameroon"},{name:"Marie",country:"Cameroon"},{name:"Pierre",country:"Cameroon"},{name:"Grace",country:"Cameroon"},{name:"Emmanuel",country:"Cameroon"},{name:"Blessing",country:"Cameroon"},{name:"Francois",country:"Cameroon"},{name:"Patience",country:"Cameroon"},{name:"Paul",country:"Cameroon"},{name:"Joy",country:"Cameroon"},{name:"Joseph",country:"Cameroon"},{name:"Faith",country:"Cameroon"},{name:"Jacques",country:"Cameroon"},{name:"Hope",country:"Cameroon"},{name:"Samuel",country:"Cameroon"},{name:"Mercy",country:"Cameroon"},{name:"Daniel",country:"Cameroon"},{name:"Charity",country:"Cameroon"},{name:"Etienne",country:"Cameroon"},{name:"Peace",country:"Cameroon"},
+  {name:"Kouassi",country:"Ivory Coast"},{name:"Aya",country:"Ivory Coast"},{name:"Kouame",country:"Ivory Coast"},{name:"Adjoua",country:"Ivory Coast"},{name:"Yao",country:"Ivory Coast"},{name:"Koffi",country:"Ivory Coast"},{name:"Amoin",country:"Ivory Coast"},{name:"Bla",country:"Ivory Coast"},{name:"Akissi",country:"Ivory Coast"},{name:"Kouakou",country:"Ivory Coast"},{name:"Ahou",country:"Ivory Coast"},{name:"Brou",country:"Ivory Coast"},{name:"N'Guessan",country:"Ivory Coast"},{name:"Kouadio",country:"Ivory Coast"},{name:"Amon",country:"Ivory Coast"},{name:"Essis",country:"Ivory Coast"},{name:"N'Dri",country:"Ivory Coast"},{name:"Yapo",country:"Ivory Coast"},{name:"Kone",country:"Ivory Coast"},{name:"Ettien",country:"Ivory Coast"},
+  {name:"Tatenda",country:"Zimbabwe"},{name:"Rudo",country:"Zimbabwe"},{name:"Tendai",country:"Zimbabwe"},{name:"Tariro",country:"Zimbabwe"},{name:"Shingirai",country:"Zimbabwe"},{name:"Netsai",country:"Zimbabwe"},{name:"Tawanda",country:"Zimbabwe"},{name:"Rutendo",country:"Zimbabwe"},{name:"Farai",country:"Zimbabwe"},{name:"Munashe",country:"Zimbabwe"},{name:"Kudakwashe",country:"Zimbabwe"},{name:"Tariro",country:"Zimbabwe"},{name:"Blessing",country:"Zimbabwe"},{name:"Tino",country:"Zimbabwe"},{name:"Simba",country:"Zimbabwe"},{name:"Chido",country:"Zimbabwe"},{name:"Tapiwa",country:"Zimbabwe"},{name:"Ruvimbo",country:"Zimbabwe"},{name:"Tanaka",country:"Zimbabwe"},{name:"Kudzi",country:"Zimbabwe"},
+  {name:"Chanda",country:"Zambia"},{name:"Mutale",country:"Zambia"},{name:"Banda",country:"Zambia"},{name:"Namuchana",country:"Zambia"},{name:"Mulenga",country:"Zambia"},{name:"Bwalya",country:"Zambia"},{name:"Tembo",country:"Zambia"},{name:"Mubanga",country:"Zambia"},{name:"Kunda",country:"Zambia"},{name:"Chileshe",country:"Zambia"},{name:"Kabwe",country:"Zambia"},{name:"Nalungwe",country:"Zambia"},{name:"Sakala",country:"Zambia"},{name:"Mwangala",country:"Zambia"},{name:"Phiri",country:"Zambia"},{name:"Mukuka",country:"Zambia"},{name:"Lungu",country:"Zambia"},{name:"Chisanga",country:"Zambia"},{name:"Daka",country:"Zambia"},{name:"Mumba",country:"Zambia"},
+  {name:"Jean",country:"Rwanda"},{name:"Claire",country:"Rwanda"},{name:"Emmanuel",country:"Rwanda"},{name:"Diane",country:"Rwanda"},{name:"Patrick",country:"Rwanda"},{name:"Liliane",country:"Rwanda"},{name:"Innocent",country:"Rwanda"},{name:"Marie",country:"Rwanda"},{name:"Eric",country:"Rwanda"},{name:"Sandrine",country:"Rwanda"},{name:"Claude",country:"Rwanda"},{name:"Alice",country:"Rwanda"},{name:"Olivier",country:"Rwanda"},{name:"Angelique",country:"Rwanda"},{name:"Fred",country:"Rwanda"},{name:"Jeanne",country:"Rwanda"},{name:"Alain",country:"Rwanda"},{name:"Consolee",country:"Rwanda"},{name:"Pierre",country:"Rwanda"},{name:"Chantal",country:"Rwanda"},
+  {name:"Youssef",country:"Morocco"},{name:"Fatima",country:"Morocco"},{name:"Ahmed",country:"Morocco"},{name:"Aicha",country:"Morocco"},{name:"Mohamed",country:"Morocco"},{name:"Khadija",country:"Morocco"},{name:"Hassan",country:"Morocco"},{name:"Nour",country:"Morocco"},{name:"Omar",country:"Morocco"},{name:"Sanaa",country:"Morocco"},{name:"Karim",country:"Morocco"},{name:"Laila",country:"Morocco"},{name:"Rachid",country:"Morocco"},{name:"Samira",country:"Morocco"},{name:"Mehdi",country:"Morocco"},{name:"Imane",country:"Morocco"},{name:"Adil",country:"Morocco"},{name:"Salma",country:"Morocco"},{name:"Hamza",country:"Morocco"},{name:"Zineb",country:"Morocco"},
+  {name:"Amine",country:"Algeria"},{name:"Sarah",country:"Algeria"},{name:"Karim",country:"Algeria"},{name:"Lyna",country:"Algeria"},{name:"Sofiane",country:"Algeria"},{name:"Yasmine",country:"Algeria"},{name:"Nadir",country:"Algeria"},{name:"Nadia",country:"Algeria"},{name:"Mehdi",country:"Algeria"},{name:"Amel",country:"Algeria"},{name:"Hichem",country:"Algeria"},{name:"Djamila",country:"Algeria"},{name:"Tarek",country:"Algeria"},{name:"Sabrina",country:"Algeria"},{name:"Lyes",country:"Algeria"},{name:"Meriem",country:"Algeria"},{name:"Adel",country:"Algeria"},{name:"Rania",country:"Algeria"},{name:"Fares",country:"Algeria"},{name:"Lamia",country:"Algeria"},
+  {name:"Omar",country:"Egypt"},{name:"Yasmin",country:"Egypt"},{name:"Amir",country:"Egypt"},{name:"Nour",country:"Egypt"},{name:"Karim",country:"Egypt"},{name:"Layla",country:"Egypt"},{name:"Tarek",country:"Egypt"},{name:"Salma",country:"Egypt"},{name:"Hassan",country:"Egypt"},{name:"Mariam",country:"Egypt"},{name:"Ahmed",country:"Egypt"},{name:"Farah",country:"Egypt"},{name:"Mostafa",country:"Egypt"},{name:"Dana",country:"Egypt"},{name:"Youssef",country:"Egypt"},{name:"Habiba",country:"Egypt"},{name:"Mahmoud",country:"Egypt"},{name:"Aya",country:"Egypt"},{name:"Ibrahim",country:"Egypt"},{name:"Shahd",country:"Egypt"},
+  {name:"Amir",country:"Tunisia"},{name:"Yasmine",country:"Tunisia"},{name:"Mehdi",country:"Tunisia"},{name:"Ines",country:"Tunisia"},{name:"Nader",country:"Tunisia"},{name:"Rania",country:"Tunisia"},{name:"Houssem",country:"Tunisia"},{name:"Sana",country:"Tunisia"},{name:"Anis",country:"Tunisia"},{name:"Nawres",country:"Tunisia"},{name:"Karim",country:"Tunisia"},{name:"Maram",country:"Tunisia"},{name:"Bilel",country:"Tunisia"},{name:"Asma",country:"Tunisia"},{name:"Wael",country:"Tunisia"},{name:"Hela",country:"Tunisia"},{name:"Slim",country:"Tunisia"},{name:"Dorsaf",country:"Tunisia"},{name:"Montassar",country:"Tunisia"},{name:"Rim",country:"Tunisia"},
+  {name:"João",country:"Angola"},{name:"Maria",country:"Angola"},{name:"Pedro",country:"Angola"},{name:"Ana",country:"Angola"},{name:"Manuel",country:"Angola"},{name:"Teresa",country:"Angola"},{name:"Francisco",country:"Angola"},{name:"Luzia",country:"Angola"},{name:"António",country:"Angola"},{name:"Rosa",country:"Angola"},{name:"José",country:"Angola"},{name:"Catarina",country:"Angola"},{name:"Paulo",country:"Angola"},{name:"Isabel",country:"Angola"},{name:"Domingos",country:"Angola"},{name:"Filomena",country:"Angola"},{name:"Eduardo",country:"Angola"},{name:"Conceição",country:"Angola"},{name:"Alberto",country:"Angola"},{name:"Lucia",country:"Angola"},
+  {name:"Carlos",country:"Mozambique"},{name:"Fernanda",country:"Mozambique"},{name:"Mauro",country:"Mozambique"},{name:"Cristina",country:"Mozambique"},{name:"Eduardo",country:"Mozambique"},{name:"Lucia",country:"Mozambique"},{name:"Armando",country:"Mozambique"},{name:"Amelia",country:"Mozambique"},{name:"Felizardo",country:"Mozambique"},{name:"Celia",country:"Mozambique"},{name:"Horácio",country:"Mozambique"},{name:"Dina",country:"Mozambique"},{name:"Abdul",country:"Mozambique"},{name:"Rosa",country:"Mozambique"},{name:"Samuel",country:"Mozambique"},{name:"Angelina",country:"Mozambique"},{name:"Lucas",country:"Mozambique"},{name:"Esperança",country:"Mozambique"},{name:"Daniel",country:"Mozambique"},{name:"Olivia",country:"Mozambique"},
+  {name:"Kagiso",country:"Botswana"},{name:"Lesego",country:"Botswana"},{name:"Thabo",country:"Botswana"},{name:"Tebogo",country:"Botswana"},{name:"Mpho",country:"Botswana"},{name:"Kelebogile",country:"Botswana"},{name:"Thato",country:"Botswana"},{name:"Boitumelo",country:"Botswana"},{name:"Otsile",country:"Botswana"},{name:"Warona",country:"Botswana"},{name:"Tumelo",country:"Botswana"},{name:"Phenyo",country:"Botswana"},{name:"Kgosikgolo",country:"Botswana"},{name:"Gaone",country:"Botswana"},{name:"Tefo",country:"Botswana"},{name:"Mosa",country:"Botswana"},{name:"Neo",country:"Botswana"},{name:"Resego",country:"Botswana"},{name:"Batlokwa",country:"Botswana"},{name:"Lorato",country:"Botswana"},
+  {name:"Tangi",country:"Namibia"},{name:"Lydia",country:"Namibia"},{name:"Pendy",country:"Namibia"},{name:"Julia",country:"Namibia"},{name:"Joseph",country:"Namibia"},{name:"Maria",country:"Namibia"},{name:"Tomas",country:"Namibia"},{name:"Naemi",country:"Namibia"},{name:"Lazarus",country:"Namibia"},{name:"Magdalena",country:"Namibia"},{name:"Erastus",country:"Namibia"},{name:"Vistorina",country:"Namibia"},{name:"Petrus",country:"Namibia"},{name:"Beata",country:"Namibia"},{name:"Nicolas",country:"Namibia"},{name:"Helena",country:"Namibia"},{name:"Simon",country:"Namibia"},{name:"Paulina",country:"Namibia"},{name:"Albert",country:"Namibia"},{name:"Martha",country:"Namibia"},
+  {name:"Moussa",country:"Mali"},{name:"Aminata",country:"Mali"},{name:"Sekou",country:"Mali"},{name:"Fatoumata",country:"Mali"},{name:"Amadou",country:"Mali"},{name:"Mariam",country:"Mali"},{name:"Bakary",country:"Mali"},{name:"Kadiatou",country:"Mali"},{name:"Drissa",country:"Mali"},{name:"Sitan",country:"Mali"},{name:"Boubacar",country:"Mali"},{name:"Nana",country:"Mali"},{name:"Ousmane",country:"Mali"},{name:"Ramatou",country:"Mali"},{name:"Modibo",country:"Mali"},{name:"Aïssata",country:"Mali"},{name:"Souleymane",country:"Mali"},{name:"Oumou",country:"Mali"},{name:"Ibrahim",country:"Mali"},{name:"Djeneba",country:"Mali"},
+  {name:"Blaise",country:"Burkina Faso"},{name:"Aminata",country:"Burkina Faso"},{name:"Jean",country:"Burkina Faso"},{name:"Mariam",country:"Burkina Faso"},{name:"Pierre",country:"Burkina Faso"},{name:"Rasmata",country:"Burkina Faso"},{name:"Paul",country:"Burkina Faso"},{name:"Salimata",country:"Burkina Faso"},{name:"Emmanuel",country:"Burkina Faso"},{name:"Kadiatou",country:"Burkina Faso"},{name:"François",country:"Burkina Faso"},{name:"Adjaratou",country:"Burkina Faso"},{name:"Isaac",country:"Burkina Faso"},{name:"Roukiatou",country:"Burkina Faso"},{name:"Moïse",country:"Burkina Faso"},{name:"Sibraogo",country:"Burkina Faso"},{name:"Norbert",country:"Burkina Faso"},{name:"Pélagie",country:"Burkina Faso"},{name:"Alfred",country:"Burkina Faso"},{name:"Claire",country:"Burkina Faso"},
+  {name:"Abdoul",country:"Niger"},{name:"Aïchatou",country:"Niger"},{name:"Moussa",country:"Niger"},{name:"Hadiza",country:"Niger"},{name:"Issa",country:"Niger"},{name:"Zalika",country:"Niger"},{name:"Mahamane",country:"Niger"},{name:"Rabi",country:"Niger"},{name:"Ibrahim",country:"Niger"},{name:"Fati",country:"Niger"},{name:"Ousmane",country:"Niger"},{name:"Salamatou",country:"Niger"},{name:"Sani",country:"Niger"},{name:"Amina",country:"Niger"},{name:"Ali",country:"Niger"},{name:"Mariama",country:"Niger"},{name:"Hamidou",country:"Niger"},{name:"Zara",country:"Niger"},{name:"Idrissa",country:"Niger"},{name:"Habsatou",country:"Niger"},
+  {name:"Mahamat",country:"Chad"},{name:"Khadija",country:"Chad"},{name:"Hassan",country:"Chad"},{name:"Amina",country:"Chad"},{name:"Idriss",country:"Chad"},{name:"Fatima",country:"Chad"},{name:"Youssouf",country:"Chad"},{name:"Halimé",country:"Chad"},{name:"Abakar",country:"Chad"},{name:"Mariam",country:"Chad"},{name:"Djimet",country:"Chad"},{name:"Nour",country:"Chad"},{name:"Brahim",country:"Chad"},{name:"Zara",country:"Chad"},{name:"Ousman",country:"Chad"},{name:"Safia",country:"Chad"},{name:"Adoum",country:"Chad"},{name:"Rachida",country:"Chad"},{name:"Saleh",country:"Chad"},{name:"Aïcha",country:"Chad"},
+  {name:"Omer",country:"Sudan"},{name:"Halima",country:"Sudan"},{name:"Ali",country:"Sudan"},{name:"Muna",country:"Sudan"},{name:"Mohamed",country:"Sudan"},{name:"Rasha",country:"Sudan"},{name:"Yousif",country:"Sudan"},{name:"Samar",country:"Sudan"},{name:"Khalid",country:"Sudan"},{name:"Nada",country:"Sudan"},{name:"Abubakr",country:"Sudan"},{name:"Widad",country:"Sudan"},{name:"Mustafa",country:"Sudan"},{name:"Asma",country:"Sudan"},{name:"Eltayeb",country:"Sudan"},{name:"Randa",country:"Sudan"},{name:"Osman",country:"Sudan"},{name:"Sawsan",country:"Sudan"},{name:"Ismail",country:"Sudan"},{name:"Hana",country:"Sudan"},
+  {name:"Mohamed",country:"Somalia"},{name:"Amina",country:"Somalia"},{name:"Abdi",country:"Somalia"},{name:"Fadumo",country:"Somalia"},{name:"Hassan",country:"Somalia"},{name:"Halima",country:"Somalia"},{name:"Yusuf",country:"Somalia"},{name:"Sahra",country:"Somalia"},{name:"Ali",country:"Somalia"},{name:"Hawa",country:"Somalia"},{name:"Ibrahim",country:"Somalia"},{name:"Khadija",country:"Somalia"},{name:"Ahmed",country:"Somalia"},{name:"Leyla",country:"Somalia"},{name:"Omar",country:"Somalia"},{name:"Nimco",country:"Somalia"},{name:"Ismail",country:"Somalia"},{name:"Rahma",country:"Somalia"},{name:"Abdullahi",country:"Somalia"},{name:"Maryan",country:"Somalia"},
+  {name:"James",country:"Liberia"},{name:"Patience",country:"Liberia"},{name:"John",country:"Liberia"},{name:"Comfort",country:"Liberia"},{name:"Joseph",country:"Liberia"},{name:"Blessing",country:"Liberia"},{name:"Samuel",country:"Liberia"},{name:"Mercy",country:"Liberia"},{name:"Daniel",country:"Liberia"},{name:"Hope",country:"Liberia"},{name:"Emmanuel",country:"Liberia"},{name:"Grace",country:"Liberia"},{name:"Prince",country:"Liberia"},{name:"Faith",country:"Liberia"},{name:"Moses",country:"Liberia"},{name:"Joy",country:"Liberia"},{name:"Victor",country:"Liberia"},{name:"Peace",country:"Liberia"},{name:"Francis",country:"Liberia"},{name:"Love",country:"Liberia"},
+  {name:"Sahr",country:"Sierra Leone"},{name:"Mabinty",country:"Sierra Leone"},{name:"Foday",country:"Sierra Leone"},{name:"Adama",country:"Sierra Leone"},{name:"Komba",country:"Sierra Leone"},{name:"Mariama",country:"Sierra Leone"},{name:"Saidu",country:"Sierra Leone"},{name:"Isatu",country:"Sierra Leone"},{name:"Alusine",country:"Sierra Leone"},{name:"Fatmata",country:"Sierra Leone"},{name:"Sheku",country:"Sierra Leone"},{name:"Hawa",country:"Sierra Leone"},{name:"Abdul",country:"Sierra Leone"},{name:"Kadiatu",country:"Sierra Leone"},{name:"Lamin",country:"Sierra Leone"},{name:"Yabom",country:"Sierra Leone"},{name:"Musa",country:"Sierra Leone"},{name:"Kumba",country:"Sierra Leone"},{name:"Brima",country:"Sierra Leone"},{name:"Aminata",country:"Sierra Leone"},
+  {name:"Mamadou",country:"Guinea"},{name:"Fatoumata",country:"Guinea"},{name:"Ibrahima",country:"Guinea"},{name:"Aïssatou",country:"Guinea"},{name:"Abdoulaye",country:"Guinea"},{name:"Mariama",country:"Guinea"},{name:"Ousmane",country:"Guinea"},{name:"Kadiatou",country:"Guinea"},{name:"Alpha",country:"Guinea"},{name:"Nene",country:"Guinea"},{name:"Sekou",country:"Guinea"},{name:"Aminata",country:"Guinea"},{name:"Elhadj",country:"Guinea"},{name:"Fanta",country:"Guinea"},{name:"Moussa",country:"Guinea"},{name:"Djeneba",country:"Guinea"},{name:"Kaba",country:"Guinea"},{name:"Rougui",country:"Guinea"},{name:"Kouyaté",country:"Guinea"},{name:"Salimatou",country:"Guinea"},
+  {name:"Kokou",country:"Benin"},{name:"Afi",country:"Benin"},{name:"Kossi",country:"Benin"},{name:"Abla",country:"Benin"},{name:"Mawuli",country:"Benin"},{name:"Edwige",country:"Benin"},{name:"Komlan",country:"Benin"},{name:"Colette",country:"Benin"},{name:"Yawovi",country:"Benin"},{name:"Rose",country:"Benin"},{name:"Ayawavi",country:"Benin"},{name:"Julienne",country:"Benin"},{name:"Essé",country:"Benin"},{name:"Germaine",country:"Benin"},{name:"Fiogan",country:"Benin"},{name:"Victoire",country:"Benin"},{name:"Tété",country:"Benin"},{name:"Akou",country:"Benin"},{name:"Koffi",country:"Benin"},{name:"Agnès",country:"Benin"},
+  {name:"Koffi",country:"Togo"},{name:"Afi",country:"Togo"},{name:"Kossi",country:"Togo"},{name:"Ayawovi",country:"Togo"},{name:"Komlan",country:"Togo"},{name:"Abla",country:"Togo"},{name:"Mawuli",country:"Togo"},{name:"Kossiwa",country:"Togo"},{name:"Yawovi",country:"Togo"},{name:"Akou",country:"Togo"},{name:"Kokou",country:"Togo"},{name:"Ami",country:"Togo"},{name:"Essé",country:"Togo"},{name:"Ahou",country:"Togo"},{name:"Fiogan",country:"Togo"},{name:"Kafui",country:"Togo"},{name:"Tété",country:"Togo"},{name:"Ekoué",country:"Togo"},{name:"Agbéko",country:"Togo"},{name:"Mawuna",country:"Togo"},
+  {name:"Jean",country:"Gabon"},{name:"Marie",country:"Gabon"},{name:"Pierre",country:"Gabon"},{name:"Grace",country:"Gabon"},{name:"Paul",country:"Gabon"},{name:"Patience",country:"Gabon"},{name:"Joseph",country:"Gabon"},{name:"Faith",country:"Gabon"},{name:"Emmanuel",country:"Gabon"},{name:"Joy",country:"Gabon"},{name:"André",country:"Gabon"},{name:"Hope",country:"Gabon"},{name:"François",country:"Gabon"},{name:"Mercy",country:"Gabon"},{name:"Louis",country:"Gabon"},{name:"Charity",country:"Gabon"},{name:"Henri",country:"Gabon"},{name:"Peace",country:"Gabon"},{name:"Robert",country:"Gabon"},{name:"Blessing",country:"Gabon"},
+  {name:"Jean",country:"Congo"},{name:"Aimée",country:"Congo"},{name:"Pierre",country:"Congo"},{name:"Grâce",country:"Congo"},{name:"Joseph",country:"Congo"},{name:"Patience",country:"Congo"},{name:"Paul",country:"Congo"},{name:"Foi",country:"Congo"},{name:"Emmanuel",country:"Congo"},{name:"Joie",country:"Congo"},{name:"André",country:"Congo"},{name:"Espérance",country:"Congo"},{name:"François",country:"Congo"},{name:"Miséricorde",country:"Congo"},{name:"Henri",country:"Congo"},{name:"Charité",country:"Congo"},{name:"Louis",country:"Congo"},{name:"Paix",country:"Congo"},{name:"Robert",country:"Congo"},{name:"Bénédiction",country:"Congo"},
+  {name:"Jean",country:"DRC"},{name:"Marie",country:"DRC"},{name:"Pierre",country:"DRC"},{name:"Grâce",country:"DRC"},{name:"Joseph",country:"DRC"},{name:"Patience",country:"DRC"},{name:"Paul",country:"DRC"},{name:"Foi",country:"DRC"},{name:"Emmanuel",country:"DRC"},{name:"Joie",country:"DRC"},{name:"André",country:"DRC"},{name:"Espérance",country:"DRC"},{name:"François",country:"DRC"},{name:"Miséricorde",country:"DRC"},{name:"Henri",country:"DRC"},{name:"Charité",country:"DRC"},{name:"Louis",country:"DRC"},{name:"Paix",country:"DRC"},{name:"Robert",country:"DRC"},{name:"Bénédiction",country:"DRC"},
+  {name:"Chikondi",country:"Malawi"},{name:"Yamikani",country:"Malawi"},{name:"Blessings",country:"Malawi"},{name:"Takondwa",country:"Malawi"},{name:"Mphatso",country:"Malawi"},{name:"Joy",country:"Malawi"},{name:"Mwayi",country:"Malawi"},{name:"Hope",country:"Malawi"},{name:"Chisomo",country:"Malawi"},{name:"Peace",country:"Malawi"},{name:"Kondwani",country:"Malawi"},{name:"Grace",country:"Malawi"},{name:"Madalitso",country:"Malawi"},{name:"Mercy",country:"Malawi"},{name:"Dalitso",country:"Malawi"},{name:"Faith",country:"Malawi"},{name:"Yankho",country:"Malawi"},{name:"Love",country:"Malawi"},{name:"Wongani",country:"Malawi"},{name:"Patience",country:"Malawi"},
+  {name:"Rakoto",country:"Madagascar"},{name:"Nirina",country:"Madagascar"},{name:"Rabe",country:"Madagascar"},{name:"Mialy",country:"Madagascar"},{name:"Andry",country:"Madagascar"},{name:"Lalao",country:"Madagascar"},{name:"Hery",country:"Madagascar"},{name:"Voahangy",country:"Madagascar"},{name:"Tovo",country:"Madagascar"},{name:"Rina",country:"Madagascar"},{name:"Faly",country:"Madagascar"},{name:"Hanitra",country:"Madagascar"},{name:"Tahina",country:"Madagascar"},{name:"Zo",country:"Madagascar"},{name:"Mamy",country:"Madagascar"},{name:"Nivo",country:"Madagascar"},{name:"Lova",country:"Madagascar"},{name:"Fara",country:"Madagascar"},{name:"Tiana",country:"Madagascar"},{name:"Soa",country:"Madagascar"},
+  {name:"Jean",country:"Mauritius"},{name:"Marie",country:"Mauritius"},{name:"Pierre",country:"Mauritius"},{name:"Anne",country:"Mauritius"},{name:"Paul",country:"Mauritius"},{name:"Nicole",country:"Mauritius"},{name:"Joseph",country:"Mauritius"},{name:"Christiane",country:"Mauritius"},{name:"André",country:"Mauritius"},{name:"Sylvie",country:"Mauritius"},{name:"François",country:"Mauritius"},{name:"Jocelyne",country:"Mauritius"},{name:"Louis",country:"Mauritius"},{name:"Monique",country:"Mauritius"},{name:"Robert",country:"Mauritius"},{name:"Josiane",country:"Mauritius"},{name:"Henri",country:"Mauritius"},{name:"Marcelle",country:"Mauritius"},{name:"Jacques",country:"Mauritius"},{name:"Ginette",country:"Mauritius"},
+  {name:"Mandla",country:"Eswatini"},{name:"Thandi",country:"Eswatini"},{name:"Bongani",country:"Eswatini"},{name:"Sibongile",country:"Eswatini"},{name:"Sibusiso",country:"Eswatini"},{name:"Nomcebo",country:"Eswatini"},{name:"Thabo",country:"Eswatini"},{name:"Lungile",country:"Eswatini"},{name:"Musa",country:"Eswatini"},{name:"Nosipho",country:"Eswatini"},{name:"Kagiso",country:"Eswatini"},{name:"Hlobile",country:"Eswatini"},{name:"Simphiwe",country:"Eswatini"},{name:"Temahlubi",country:"Eswatini"},{name:"Mduduzi",country:"Eswatini"},{name:"Nonhlanhla",country:"Eswatini"},{name:"Sifiso",country:"Eswatini"},{name:"Bongiwe",country:"Eswatini"},{name:"Mfana",country:"Eswatini"},{name:"Celiwe",country:"Eswatini"},
+  {name:"Thabo",country:"Lesotho"},{name:"Mpho",country:"Lesotho"},{name:"Teboho",country:"Lesotho"},{name:"Matšepo",country:"Lesotho"},{name:"Thato",country:"Lesotho"},{name:"Mampho",country:"Lesotho"},{name:"Khotso",country:"Lesotho"},{name:"Palesa",country:"Lesotho"},{name:"Rethabile",country:"Lesotho"},{name:"Lineo",country:"Lesotho"},{name:"Katleho",country:"Lesotho"},{name:"Makatiso",country:"Lesotho"},{name:"Bokang",country:"Lesotho"},{name:"Maretšepi",country:"Lesotho"},{name:"Tumelo",country:"Lesotho"},{name:"Maseriti",country:"Lesotho"},{name:"Lehlohonolo",country:"Lesotho"},{name:"Nthabiseng",country:"Lesotho"},{name:"Mokete",country:"Lesotho"},{name:"Liteboho",country:"Lesotho"},
+  {name:"Omar",country:"Gambia"},{name:"Fatou",country:"Gambia"},{name:"Musa",country:"Gambia"},{name:"Ndey",country:"Gambia"},{name:"Bakary",country:"Gambia"},{name:"Isatou",country:"Gambia"},{name:"Ebrima",country:"Gambia"},{name:"Awa",country:"Gambia"},{name:"Modou",country:"Gambia"},{name:"Mariama",country:"Gambia"},{name:"Saihou",country:"Gambia"},{name:"Binta",country:"Gambia"},{name:"Lamin",country:"Gambia"},{name:"Amie",country:"Gambia"},{name:"Alieu",country:"Gambia"},{name:"Kaddy",country:"Gambia"},{name:"Karamo",country:"Gambia"},{name:"Rohey",country:"Gambia"},{name:"Sheriff",country:"Gambia"},{name:"Nenneh",country:"Gambia"},
+  {name:"Braima",country:"Guinea-Bissau"},{name:"Nadi",country:"Guinea-Bissau"},{name:"Alfa",country:"Guinea-Bissau"},{name:"Binta",country:"Guinea-Bissau"},{name:"Bacar",country:"Guinea-Bissau"},{name:"Tchuda",country:"Guinea-Bissau"},{name:"Dino",country:"Guinea-Bissau"},{name:"Fatumata",country:"Guinea-Bissau"},{name:"Bubacar",country:"Guinea-Bissau"},{name:"Mariama",country:"Guinea-Bissau"},{name:"Braima",country:"Guinea-Bissau"},{name:"Sira",country:"Guinea-Bissau"},{name:"Mamadu",country:"Guinea-Bissau"},{name:"Lili",country:"Guinea-Bissau"},{name:"Nhaga",country:"Guinea-Bissau"},{name:"Bia",country:"Guinea-Bissau"},{name:"Suleimane",country:"Guinea-Bissau"},{name:"Cadi",country:"Guinea-Bissau"},{name:"Iaia",country:"Guinea-Bissau"},{name:"Aissatou",country:"Guinea-Bissau"},
+  {name:"Carlos",country:"Cape Verde"},{name:"Ana",country:"Cape Verde"},{name:"João",country:"Cape Verde"},{name:"Maria",country:"Cape Verde"},{name:"António",country:"Cape Verde"},{name:"Rosa",country:"Cape Verde"},{name:"Manuel",country:"Cape Verde"},{name:"Luzia",country:"Cape Verde"},{name:"José",country:"Cape Verde"},{name:"Catarina",country:"Cape Verde"},{name:"Paulo",country:"Cape Verde"},{name:"Isabel",country:"Cape Verde"},{name:"Pedro",country:"Cape Verde"},{name:"Conceição",country:"Cape Verde"},{name:"Eduardo",country:"Cape Verde"},{name:"Filomena",country:"Cape Verde"},{name:"Francisco",country:"Cape Verde"},{name:"Rita",country:"Cape Verde"},{name:"Abel",country:"Cape Verde"},{name:"Lucia",country:"Cape Verde"},
+  {name:"Manuel",country:"Sao Tome"},{name:"Maria",country:"Sao Tome"},{name:"Carlos",country:"Sao Tome"},{name:"Ana",country:"Sao Tome"},{name:"João",country:"Sao Tome"},{name:"Rosa",country:"Sao Tome"},{name:"António",country:"Sao Tome"},{name:"Luzia",country:"Sao Tome"},{name:"José",country:"Sao Tome"},{name:"Catarina",country:"Sao Tome"},{name:"Paulo",country:"Sao Tome"},{name:"Isabel",country:"Sao Tome"},{name:"Pedro",country:"Sao Tome"},{name:"Conceição",country:"Sao Tome"},{name:"Eduardo",country:"Sao Tome"},{name:"Filomena",country:"Sao Tome"},{name:"Francisco",country:"Sao Tome"},{name:"Rita",country:"Sao Tome"},{name:"Abel",country:"Sao Tome"},{name:"Lucia",country:"Sao Tome"},
+  {name:"Juan",country:"Equatorial Guinea"},{name:"María",country:"Equatorial Guinea"},{name:"Pedro",country:"Equatorial Guinea"},{name:"Ana",country:"Equatorial Guinea"},{name:"José",country:"Equatorial Guinea"},{name:"Carmen",country:"Equatorial Guinea"},{name:"Manuel",country:"Equatorial Guinea"},{name:"Dolores",country:"Equatorial Guinea"},{name:"Francisco",country:"Equatorial Guinea"},{name:"Isabel",country:"Equatorial Guinea"},{name:"Antonio",country:"Equatorial Guinea"},{name:"Teresa",country:"Equatorial Guinea"},{name:"Luis",country:"Equatorial Guinea"},{name:"Rosa",country:"Equatorial Guinea"},{name:"Andrés",country:"Equatorial Guinea"},{name:"Pilar",country:"Equatorial Guinea"},{name:"Jesús",country:"Equatorial Guinea"},{name:"Mercedes",country:"Equatorial Guinea"},{name:"Miguel",country:"Equatorial Guinea"},{name:"Concepción",country:"Equatorial Guinea"},
+  {name:"Jean",country:"Central African Republic"},{name:"Marie",country:"Central African Republic"},{name:"Pierre",country:"Central African Republic"},{name:"Aimée",country:"Central African Republic"},{name:"Joseph",country:"Central African Republic"},{name:"Grâce",country:"Central African Republic"},{name:"Paul",country:"Central African Republic"},{name:"Patience",country:"Central African Republic"},{name:"Emmanuel",country:"Central African Republic"},{name:"Foi",country:"Central African Republic"},{name:"André",country:"Central African Republic"},{name:"Joie",country:"Central African Republic"},{name:"François",country:"Central African Republic"},{name:"Espérance",country:"Central African Republic"},{name:"Henri",country:"Central African Republic"},{name:"Miséricorde",country:"Central African Republic"},{name:"Louis",country:"Central African Republic"},{name:"Charité",country:"Central African Republic"},{name:"Robert",country:"Central African Republic"},{name:"Paix",country:"Central African Republic"},
+  {name:"Tesfay",country:"Eritrea"},{name:"Hiwot",country:"Eritrea"},{name:"Yonas",country:"Eritrea"},{name:"Selam",country:"Eritrea"},{name:"Dawit",country:"Eritrea"},{name:"Abeba",country:"Eritrea"},{name:"Mehari",country:"Eritrea"},{name:"Fikir",country:"Eritrea"},{name:"Kiflom",country:"Eritrea"},{name:"Tigist",country:"Eritrea"},{name:"Bereket",country:"Eritrea"},{name:"Meron",country:"Eritrea"},{name:"Alem",country:"Eritrea"},{name:"Hanna",country:"Eritrea"},{name:"Tewodros",country:"Eritrea"},{name:"Rahel",country:"Eritrea"},{name:"Assefa",country:"Eritrea"},{name:"Worku",country:"Eritrea"},{name:"Gideon",country:"Eritrea"},{name:"Yordanos",country:"Eritrea"},
+  {name:"Abdi",country:"Djibouti"},{name:"Hibo",country:"Djibouti"},{name:"Hassan",country:"Djibouti"},{name:"Fadumo",country:"Djibouti"},{name:"Mohamed",country:"Djibouti"},{name:"Sahra",country:"Djibouti"},{name:"Omar",country:"Djibouti"},{name:"Amina",country:"Djibouti"},{name:"Ali",country:"Djibouti"},{name:"Khadija",country:"Djibouti"},{name:"Yusuf",country:"Djibouti"},{name:"Halima",country:"Djibouti"},{name:"Ibrahim",country:"Djibouti"},{name:"Leyla",country:"Djibouti"},{name:"Ahmed",country:"Djibouti"},{name:"Maryan",country:"Djibouti"},{name:"Abdullahi",country:"Djibouti"},{name:"Nimco",country:"Djibouti"},{name:"Hassan",country:"Djibouti"},{name:"Rahma",country:"Djibouti"},
+  {name:"Ali",country:"Comoros"},{name:"Amina",country:"Comoros"},{name:"Mohamed",country:"Comoros"},{name:"Fatima",country:"Comoros"},{name:"Said",country:"Comoros"},{name:"Halima",country:"Comoros"},{name:"Ibrahim",country:"Comoros"},{name:"Khadija",country:"Comoros"},{name:"Omar",country:"Comoros"},{name:"Sahra",country:"Comoros"},{name:"Yusuf",country:"Comoros"},{name:"Leyla",country:"Comoros"},{name:"Ahmed",country:"Comoros"},{name:"Maryan",country:"Comoros"},{name:"Abdi",country:"Comoros"},{name:"Nimco",country:"Comoros"},{name:"Hassan",country:"Comoros"},{name:"Rahma",country:"Comoros"},{name:"Ismail",country:"Comoros"},{name:"Fadumo",country:"Comoros"},
+  {name:"Jean",country:"Seychelles"},{name:"Marie",country:"Seychelles"},{name:"Pierre",country:"Seychelles"},{name:"Anne",country:"Seychelles"},{name:"Paul",country:"Seychelles"},{name:"Nicole",country:"Seychelles"},{name:"Joseph",country:"Seychelles"},{name:"Christiane",country:"Seychelles"},{name:"André",country:"Seychelles"},{name:"Sylvie",country:"Seychelles"},{name:"François",country:"Seychelles"},{name:"Jocelyne",country:"Seychelles"},{name:"Louis",country:"Seychelles"},{name:"Monique",country:"Seychelles"},{name:"Robert",country:"Seychelles"},{name:"Josiane",country:"Seychelles"},{name:"Henri",country:"Seychelles"},{name:"Marcelle",country:"Seychelles"},{name:"Jacques",country:"Seychelles"},{name:"Ginette",country:"Seychelles"},
+  {name:"Deng",country:"South Sudan"},{name:"Ayuen",country:"South Sudan"},{name:"Garang",country:"South Sudan"},{name:"Achol",country:"South Sudan"},{name:"Kuol",country:"South Sudan"},{name:"Alek",country:"South Sudan"},{name:"Mabior",country:"South Sudan"},{name:"Nyamal",country:"South Sudan"},{name:"Bol",country:"South Sudan"},{name:"Ajak",country:"South Sudan"},{name:"Chol",country:"South Sudan"},{name:"Adut",country:"South Sudan"},{name:"Thon",country:"South Sudan"},{name:"Akuac",country:"South Sudan"},{name:"Riek",country:"South Sudan"},{name:"Aman",country:"South Sudan"},{name:"Majok",country:"South Sudan"},{name:"Ayak",country:"South Sudan"},{name:"Lual",country:"South Sudan"},{name:"Rebecca",country:"South Sudan"},
+  {name:"Omar",country:"Libya"},{name:"Aisha",country:"Libya"},{name:"Mohamed",country:"Libya"},{name:"Fatima",country:"Libya"},{name:"Ahmed",country:"Libya"},{name:"Khadija",country:"Libya"},{name:"Ali",country:"Libya"},{name:"Nour",country:"Libya"},{name:"Hassan",country:"Libya"},{name:"Salma",country:"Libya"},{name:"Youssef",country:"Libya"},{name:"Laila",country:"Libya"},{name:"Karim",country:"Libya"},{name:"Zainab",country:"Libya"},{name:"Tarek",country:"Libya"},{name:"Imane",country:"Libya"},{name:"Mehdi",country:"Libya"},{name:"Rania",country:"Libya"},{name:"Adil",country:"Libya"},{name:"Samira",country:"Libya"},
+  {name:"Mohamed",country:"Mauritania"},{name:"Aminetou",country:"Mauritania"},{name:"Brahim",country:"Mauritania"},{name:"Dicko",country:"Mauritania"},{name:"Sidi",country:"Mauritania"},{name:"Mariem",country:"Mauritania"},{name:"Cheikh",country:"Mauritania"},{name:"Zeinab",country:"Mauritania"},{name:"Baba",country:"Mauritania"},{name:"Hawa",country:"Mauritania"},{name:"Moussa",country:"Mauritania"},{name:"Kadiata",country:"Mauritania"},{name:"Abdallahi",country:"Mauritania"},{name:"Aichetou",country:"Mauritania"},{name:"Daddah",country:"Mauritania"},{name:"Mint",country:"Mauritania"},{name:"El",country:"Mauritania"},{name:"Vall",country:"Mauritania"},{name:"Boubacar",country:"Mauritania"},{name:"Aïchatou",country:"Mauritania"},
+  {name:"Lahbib",country:"Western Sahara"},{name:"Tetou",country:"Western Sahara"},{name:"Brahim",country:"Western Sahara"},{name:"Daya",country:"Western Sahara"},{name:"Mohamed",country:"Western Sahara"},{name:"Laula",country:"Western Sahara"},{name:"El",country:"Western Sahara"},{name:"Mariem",country:"Western Sahara"},{name:"Sidi",country:"Western Sahara"},{name:"Zeinab",country:"Western Sahara"},{name:"Baba",country:"Western Sahara"},{name:"Hawa",country:"Western Sahara"},{name:"Moussa",country:"Western Sahara"},{name:"Kadiata",country:"Western Sahara"},{name:"Cheikh",country:"Western Sahara"},{name:"Aichetou",country:"Western Sahara"},{name:"Daddah",country:"Western Sahara"},{name:"Mint",country:"Western Sahara"},{name:"Vall",country:"Western Sahara"},{name:"Aïchatou",country:"Western Sahara"},
+  {name:"Jean",country:"Burundi"},{name:"Marie",country:"Burundi"},{name:"Pierre",country:"Burundi"},{name:"Grâce",country:"Burundi"},{name:"Joseph",country:"Burundi"},{name:"Patience",country:"Burundi"},{name:"Paul",country:"Burundi"},{name:"Foi",country:"Burundi"},{name:"Emmanuel",country:"Burundi"},{name:"Joie",country:"Burundi"},{name:"André",country:"Burundi"},{name:"Espérance",country:"Burundi"},{name:"François",country:"Burundi"},{name:"Miséricorde",country:"Burundi"},{name:"Henri",country:"Burundi"},{name:"Charité",country:"Burundi"},{name:"Louis",country:"Burundi"},{name:"Paix",country:"Burundi"},{name:"Robert",country:"Burundi"},{name:"Bénédiction",country:"Burundi"},
+  {name:"Jean",country:"Mayotte"},{name:"Marie",country:"Mayotte"},{name:"Pierre",country:"Mayotte"},{name:"Anne",country:"Mayotte"},{name:"Paul",country:"Mayotte"},{name:"Nicole",country:"Mayotte"},{name:"Joseph",country:"Mayotte"},{name:"Christiane",country:"Mayotte"},{name:"André",country:"Mayotte"},{name:"Sylvie",country:"Mayotte"},{name:"François",country:"Mayotte"},{name:"Jocelyne",country:"Mayotte"},{name:"Louis",country:"Mayotte"},{name:"Monique",country:"Mayotte"},{name:"Robert",country:"Mayotte"},{name:"Josiane",country:"Mayotte"},{name:"Henri",country:"Mayotte"},{name:"Marcelle",country:"Mayotte"},{name:"Jacques",country:"Mayotte"},{name:"Ginette",country:"Mayotte"},
+  {name:"Jean",country:"Reunion"},{name:"Marie",country:"Reunion"},{name:"Pierre",country:"Reunion"},{name:"Anne",country:"Reunion"},{name:"Paul",country:"Reunion"},{name:"Nicole",country:"Reunion"},{name:"Joseph",country:"Reunion"},{name:"Christiane",country:"Reunion"},{name:"André",country:"Reunion"},{name:"Sylvie",country:"Reunion"},{name:"François",country:"Reunion"},{name:"Jocelyne",country:"Reunion"},{name:"Louis",country:"Reunion"},{name:"Monique",country:"Reunion"},{name:"Robert",country:"Reunion"},{name:"Josiane",country:"Reunion"},{name:"Henri",country:"Reunion"},{name:"Marcelle",country:"Reunion"},{name:"Jacques",country:"Reunion"},{name:"Ginette",country:"Reunion"},
+  {name:"Juan",country:"Canary Islands"},{name:"María",country:"Canary Islands"},{name:"Pedro",country:"Canary Islands"},{name:"Ana",country:"Canary Islands"},{name:"José",country:"Canary Islands"},{name:"Carmen",country:"Canary Islands"},{name:"Manuel",country:"Canary Islands"},{name:"Dolores",country:"Canary Islands"},{name:"Francisco",country:"Canary Islands"},{name:"Isabel",country:"Canary Islands"},{name:"Antonio",country:"Canary Islands"},{name:"Teresa",country:"Canary Islands"},{name:"Luis",country:"Canary Islands"},{name:"Rosa",country:"Canary Islands"},{name:"Andrés",country:"Canary Islands"},{name:"Pilar",country:"Canary Islands"},{name:"Jesús",country:"Canary Islands"},{name:"Mercedes",country:"Canary Islands"},{name:"Miguel",country:"Canary Islands"},{name:"Concepción",country:"Canary Islands"},
+  {name:"James",country:"Saint Helena"},{name:"Patience",country:"Saint Helena"},{name:"John",country:"Saint Helena"},{name:"Comfort",country:"Saint Helena"},{name:"Joseph",country:"Saint Helena"},{name:"Blessing",country:"Saint Helena"},{name:"Samuel",country:"Saint Helena"},{name:"Mercy",country:"Saint Helena"},{name:"Daniel",country:"Saint Helena"},{name:"Hope",country:"Saint Helena"},{name:"Emmanuel",country:"Saint Helena"},{name:"Grace",country:"Saint Helena"},{name:"Prince",country:"Saint Helena"},{name:"Faith",country:"Saint Helena"},{name:"Moses",country:"Saint Helena"},{name:"Joy",country:"Saint Helena"},{name:"Victor",country:"Saint Helena"},{name:"Peace",country:"Saint Helena"},{name:"Francis",country:"Saint Helena"},{name:"Love",country:"Saint Helena"},
+  {name:"João",country:"Madeira"},{name:"Maria",country:"Madeira"},{name:"Pedro",country:"Madeira"},{name:"Ana",country:"Madeira"},{name:"Manuel",country:"Madeira"},{name:"Teresa",country:"Madeira"},{name:"Francisco",country:"Madeira"},{name:"Luzia",country:"Madeira"},{name:"António",country:"Madeira"},{name:"Rosa",country:"Madeira"},{name:"José",country:"Madeira"},{name:"Catarina",country:"Madeira"},{name:"Paulo",country:"Madeira"},{name:"Isabel",country:"Madeira"},{name:"Domingos",country:"Madeira"},{name:"Conceição",country:"Madeira"},{name:"Eduardo",country:"Madeira"},{name:"Filomena",country:"Madeira"},{name:"Alberto",country:"Madeira"},{name:"Lucia",country:"Madeira"},
+  {name:"Mohamed",country:"Ceuta"},{name:"Fatima",country:"Ceuta"},{name:"Ahmed",country:"Ceuta"},{name:"Aicha",country:"Ceuta"},{name:"Youssef",country:"Ceuta"},{name:"Khadija",country:"Ceuta"},{name:"Hassan",country:"Ceuta"},{name:"Nour",country:"Ceuta"},{name:"Omar",country:"Ceuta"},{name:"Sanaa",country:"Ceuta"},{name:"Karim",country:"Ceuta"},{name:"Laila",country:"Ceuta"},{name:"Rachid",country:"Ceuta"},{name:"Samira",country:"Ceuta"},{name:"Mehdi",country:"Ceuta"},{name:"Imane",country:"Ceuta"},{name:"Adil",country:"Ceuta"},{name:"Salma",country:"Ceuta"},{name:"Hamza",country:"Ceuta"},{name:"Zineb",country:"Ceuta"},
+  {name:"Mohamed",country:"Melilla"},{name:"Fatima",country:"Melilla"},{name:"Ahmed",country:"Melilla"},{name:"Aicha",country:"Melilla"},{name:"Youssef",country:"Melilla"},{name:"Khadija",country:"Melilla"},{name:"Hassan",country:"Melilla"},{name:"Nour",country:"Melilla"},{name:"Omar",country:"Melilla"},{name:"Sanaa",country:"Melilla"},{name:"Karim",country:"Melilla"},{name:"Laila",country:"Melilla"},{name:"Rachid",country:"Melilla"},{name:"Samira",country:"Melilla"},{name:"Mehdi",country:"Melilla"},{name:"Imane",country:"Melilla"},{name:"Adil",country:"Melilla"},{name:"Salma",country:"Melilla"},{name:"Hamza",country:"Melilla"},{name:"Zineb",country:"Melilla"}
+];
+
+// Earning sources
+var SOURCES=["watching videos","completing surveys","referring friends","daily bonus","spinning wheel","mining rewards","streak bonus","promo tasks","social shares","quiz mastery"];
+
+// Coin amounts (realistic)
+function randomCoins(){
+  var amounts=[50,75,100,125,150,200,250,300,350,400,450,500];
+  return amounts[Math.floor(Math.random()*amounts.length)];
+}
+
+// ===== INFINITE NON-REPEATING TICKER =====
+var shuffled=[];
+var currentIndex=0;
+
+function shuffleArray(arr){
+  var a=arr.slice();
+  for(var i=a.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1));
+    var t=a[i];a[i]=a[j];a[j]=t;
+  }
+  return a;
+}
+
+function getNextEarner(){
+  if(shuffled.length===0||currentIndex>=shuffled.length){
+    shuffled=shuffleArray(AFRICAN_EARNERS);
+    currentIndex=0;
+  }
+  var e=shuffled[currentIndex];
+  currentIndex++;
+  return e;
+}
+
+function updateLiveTicker(){
+  var e=getNextEarner();
+  var coins=randomCoins();
+  var source=SOURCES[Math.floor(Math.random()*SOURCES.length)];
+  var el=document.getElementById('liveText');
+  el.style.opacity='0';
+  setTimeout(function(){
+    el.innerHTML='<span class="name">'+e.name+'</span> from <span class="country">'+e.country+'</span> earned <span class="amount">+'+coins+' coins</span> <span class="source">'+source+'</span>';
+    el.style.opacity='1';
+  },300);
+}
+
+// Initial display
+(function(){
+  var e=getNextEarner();
+  var coins=randomCoins();
+  var source=SOURCES[Math.floor(Math.random()*SOURCES.length)];
+  document.getElementById('liveText').innerHTML='<span class="name">'+e.name+'</span> from <span class="country">'+e.country+'</span> earned <span class="amount">+'+coins+' coins</span> <span class="source">'+source+'</span>';
+})();
+
+setInterval(updateLiveTicker,4000);
+
+// ===== LOAD DATA =====
+(function(){
+  var coins=parseInt(localStorage.getItem('pinkApp_coins')||localStorage.getItem('pinkCoins')||'1250');
+  document.getElementById('coinValue').textContent=coins.toLocaleString();
+
+  var today=new Date().toDateString();
+  var history=JSON.parse(localStorage.getItem('pinkHistory')||'[]');
+  var todayEarn=history.filter(function(h){return h.date===today&&h.type==='earn';})
+    .reduce(function(a,b){return a+(b.amount||0);},0);
+  document.getElementById('todayEarn').textContent=(todayEarn>0?'+':'')+todayEarn.toLocaleString();
+
+  var streak=parseInt(localStorage.getItem('pinkApp_streak')||localStorage.getItem('pinkStreak')||'0');
+  document.getElementById('streakDisplay').textContent=streak;
+
+  var recent=history.slice().reverse().slice(0,5);
+  var list=document.getElementById('activityList');
+  if(recent.length){
+    list.innerHTML=recent.map(function(h,i){
+      var isEarn=h.type==='earn';
+      return '<div class="activity-item" style="animation:fadeUp .4s '+(i*.05)+'s var(--spring) both">'+
+        '<div class="activity-icon" style="background:'+(isEarn?'rgba(37,244,238,.1)':'rgba(254,44,85,.1)')+
+          ';color:'+(isEarn?'#25f4ee':'#fe2c55')+'">'+
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+
+            '<circle cx="12" cy="12" r="10"/>'+
+            '<polyline points="12 6 12 12 16 14"/>'+
+          '</svg>'+
+        '</div>'+
+        '<div class="activity-info">'+
+          '<div class="title">'+(h.title||'Transaction')+'</div>'+
+          '<div class="time">'+(h.date||today)+'</div>'+
+        '</div>'+
+        '<div class="activity-amount" style="color:'+(isEarn?'#25f4ee':'#fe2c55')+'">'+(isEarn?'+':'-')+(h.amount||0)+'</div>'+
+      '</div>';
+    }).join('');
+  }
+})();
+
+function navigateTo(url){
+  if(window.pinkShowSpinner)window.pinkShowSpinner();
+  setTimeout(function(){window.location.href=url;},600);
+}
+</script>
+</body>
+</html>
