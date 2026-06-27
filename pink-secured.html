@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0a0a0f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Security — Pink App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pink-50: #fff0f3;
+            --pink-100: #ffd6e0;
+            --pink-400: #ff6b8a;
+            --pink-500: #fe2c55;
+            --pink-600: #e01a3f;
+            --pink-glow: rgba(254, 44, 85, 0.35);
+            --cyan: #25f4ee;
+            --gold: #ffd700;
+            --bg-base: #07070a;
+            --bg-elevated: #0f0f14;
+            --bg-surface: rgba(255, 255, 255, 0.025);
+            --glass-border: rgba(255, 255, 255, 0.06);
+            --glass-highlight: rgba(255, 255, 255, 0.08);
+            --text-primary: #f5f5f7;
+            --text-secondary: rgba(255, 255, 255, 0.55);
+            --text-tertiary: rgba(255, 255, 255, 0.35);
+            --text-muted: rgba(255, 255, 255, 0.25);
+            --success: #34d399;
+            --success-bg: rgba(52, 211, 153, 0.1);
+            --warning: #fbbf24;
+            --warning-bg: rgba(251, 191, 36, 0.1);
+            --error: #f87171;
+            --error-bg: rgba(248, 113, 113, 0.1);
+            --mono: 'IBM Plex Mono', monospace;
+            --spring: cubic-bezier(0.23, 1, 0.32, 1);
+            --smooth: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Inter', sans-serif; }
+        html { scroll-behavior: smooth; }
+        body { background: var(--bg-base); color: var(--text-primary); min-height: 100vh; overflow-x: hidden; position: relative; -webkit-font-smoothing: antialiased; }
+        :focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; border-radius: 8px; }
+
+        .ambient-bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+        .orb { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.35; animation: orbFloat 20s ease-in-out infinite; }
+        .orb-1 { width: 350px; height: 350px; background: var(--pink-500); top: -120px; right: -100px; }
+        .orb-2 { width: 280px; height: 280px; background: var(--cyan); bottom: 15%; left: -100px; opacity: 0.15; animation-delay: -7s; }
+        .orb-3 { width: 220px; height: 220px; background: var(--gold); top: 45%; left: 55%; opacity: 0.08; animation-delay: -14s; }
+        @keyframes orbFloat { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(30px,-20px) scale(1.05)} 66%{transform:translate(-20px,15px) scale(0.95)} }
+        .grain { position: fixed; inset: 0; z-index: 1; opacity: 0.025; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+        .app-container { position: relative; z-index: 2; max-width: 480px; margin: 0 auto; min-height: 100vh; }
+
+        /* HEADER */
+        .header { position: sticky; top: 0; z-index: 100; background: rgba(7,7,10,0.85); backdrop-filter: blur(40px) saturate(180%); -webkit-backdrop-filter: blur(40px) saturate(180%); padding: 0.875rem 1.25rem; display: flex; align-items: center; gap: 0.875rem; border-bottom: 1px solid var(--glass-border); }
+        .back-btn { width: 38px; height: 38px; background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); cursor: pointer; transition: all 0.25s var(--spring); }
+        .back-btn:active { transform: scale(0.92); background: var(--glass-highlight); }
+        .back-btn svg { width: 18px; height: 18px; stroke-width: 2.5; }
+        .header-title { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.01em; }
+
+        /* HERO */
+        .security-hero { margin: 1.5rem 1.25rem 0; text-align: center; padding: 2.25rem 1.5rem 2rem; background: linear-gradient(145deg, rgba(52,211,153,0.08), rgba(37,244,238,0.04)); border: 1px solid rgba(52,211,153,0.14); border-radius: 24px; position: relative; overflow: hidden; animation: fadeUp 0.6s var(--spring) both; }
+        .security-hero::before { content:''; position:absolute; top:-40%; right:-15%; width:220px; height:220px; background:radial-gradient(circle,rgba(52,211,153,0.15),transparent 70%); border-radius:50%; pointer-events:none; }
+        .security-shield { width: 68px; height: 68px; background: linear-gradient(135deg, var(--success), #059669); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.125rem; box-shadow: 0 8px 32px rgba(52,211,153,0.25); animation: shieldPulse 3s ease-in-out infinite; }
+        @keyframes shieldPulse { 0%,100%{box-shadow:0 8px 32px rgba(52,211,153,0.25)} 50%{box-shadow:0 8px 40px rgba(52,211,153,0.4)} }
+        .security-shield svg { width: 32px; height: 32px; color: white; }
+        .security-hero-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.02em; }
+        .security-hero-desc { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; max-width: 280px; margin: 0 auto; }
+        .security-badge-row { display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.25rem; flex-wrap: wrap; }
+        .security-badge { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; padding: 5px 11px; border-radius: 20px; background: rgba(52,211,153,0.1); color: var(--success); border: 1px solid rgba(52,211,153,0.2); }
+
+        /* SECTIONS */
+        .section { margin: 2rem 1.25rem 0; animation: fadeUp 0.6s var(--spring) both; }
+        .section-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-tertiary); margin-bottom: 0.875rem; padding-left: 0.125rem; }
+
+        /* FEATURE CARDS */
+        .feature-card { background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: 18px; padding: 1.125rem; margin-bottom: 0.625rem; display: flex; align-items: flex-start; gap: 0.875rem; transition: all 0.3s var(--spring); }
+        .feature-card:active { transform: scale(0.98); background: var(--glass-highlight); }
+        .feature-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .feature-icon svg { width: 20px; height: 20px; }
+        .feature-icon.green { background: linear-gradient(135deg, rgba(52,211,153,0.15), rgba(52,211,153,0.05)); color: var(--success); }
+        .feature-icon.pink { background: linear-gradient(135deg, rgba(254,44,85,0.15), rgba(254,44,85,0.05)); color: var(--pink-400); }
+        .feature-icon.cyan { background: linear-gradient(135deg, rgba(37,244,238,0.15), rgba(37,244,238,0.05)); color: var(--cyan); }
+        .feature-icon.gold { background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05)); color: var(--gold); }
+        .feature-icon.purple { background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(168,85,247,0.05)); color: #c084fc; }
+        .feature-content { flex: 1; min-width: 0; }
+        .feature-title { font-size: 0.85rem; font-weight: 700; margin-bottom: 0.25rem; letter-spacing: -0.005em; }
+        .feature-desc { font-size: 0.75rem; color: var(--text-tertiary); line-height: 1.55; }
+
+        /* STATUS BAR */
+        .status-bar { margin: 1.5rem 1.25rem 0; background: linear-gradient(135deg, rgba(52,211,153,0.07), rgba(34,211,238,0.04)); border: 1px solid rgba(52,211,153,0.14); border-radius: 16px; padding: 1rem 1.125rem; display: flex; align-items: center; gap: 0.875rem; animation: fadeUp 0.6s var(--spring) both; }
+        .status-icon { width: 36px; height: 36px; border-radius: 10px; background: var(--success-bg); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .status-icon svg { width: 18px; height: 18px; color: var(--success); }
+        .status-text { flex: 1; min-width: 0; }
+        .status-title { font-size: 0.8rem; font-weight: 700; color: var(--success); margin-bottom: 1px; }
+        .status-desc { font-size: 0.7rem; color: var(--text-tertiary); }
+        .status-check { font-size: 0.68rem; font-weight: 700; color: var(--success); background: rgba(52,211,153,0.12); padding: 4px 10px; border-radius: 20px; white-space: nowrap; }
+
+        /* PARTNER CARD — Interswitch credit, honest text-based mark (no fabricated logo) */
+        .partner-card { margin: 2rem 1.25rem 0; background: linear-gradient(135deg, rgba(255,255,255,0.035), rgba(255,255,255,0.012)); border: 1px solid var(--glass-border); border-radius: 20px; padding: 1.5rem 1.25rem; text-align: center; animation: fadeUp 0.6s var(--spring) both; }
+        .partner-eyebrow { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); margin-bottom: 0.75rem; }
+        .partner-wordmark { display: inline-flex; align-items: baseline; gap: 2px; font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.5rem; letter-spacing: -0.02em; margin-bottom: 0.875rem; }
+        .partner-wordmark .inter { color: var(--text-primary); }
+        .partner-wordmark .switch { color: var(--cyan); }
+        .partner-wordmark .dot { color: var(--pink-500); font-size: 1.5rem; line-height: 0; }
+        .partner-desc { font-size: 0.75rem; color: var(--text-tertiary); line-height: 1.6; max-width: 300px; margin: 0 auto 1.125rem; }
+        .partner-badges { display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; }
+        .partner-badge { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 11px; border-radius: 6px; background: rgba(255,255,255,0.05); color: var(--text-secondary); border: 1px solid var(--glass-border); }
+
+        /* CERTIFICATIONS */
+        .cert-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.625rem; }
+        .cert-card { background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.125rem 1rem; text-align: center; transition: all 0.3s var(--spring); }
+        .cert-card:active { transform: scale(0.97); background: var(--glass-highlight); }
+        .cert-icon { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem; }
+        .cert-icon svg { width: 18px; height: 18px; }
+        .cert-title { font-size: 0.75rem; font-weight: 700; margin-bottom: 0.25rem; }
+        .cert-desc { font-size: 0.65rem; color: var(--text-muted); line-height: 1.45; }
+
+        /* FOOTER NOTE */
+        .footer-note { margin: 2rem 1.25rem 2.5rem; text-align: center; animation: fadeUp 0.6s var(--spring) both; }
+        .footer-note-text { font-size: 0.7rem; color: var(--text-muted); line-height: 1.65; }
+        .footer-note-text a { color: var(--pink-400); text-decoration: none; }
+
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @media (prefers-reduced-motion: reduce) { *,*::before,*::after{animation-duration:0.01ms !important;transition-duration:0.01ms !important} }
+
+        /* SPINNER */
+        .spinner-overlay { position: fixed; inset: 0; background: rgba(7,7,10,0.95); backdrop-filter: blur(20px); z-index: 3000; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 1.25rem; }
+        .spinner-overlay.active { display: flex; }
+        .spinner-ring { width: 48px; height: 48px; position: relative; }
+        .spinner-ring::before { content: ''; position: absolute; inset: 0; border-radius: 50%; border: 3px solid transparent; border-top-color: var(--pink-500); border-right-color: var(--pink-400); animation: spin 0.8s linear infinite; }
+        .spinner-ring::after { content: ''; position: absolute; inset: 6px; border-radius: 50%; border: 3px solid transparent; border-bottom-color: var(--cyan); border-left-color: var(--gold); animation: spin 1.2s linear infinite reverse; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+<div class="ambient-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+</div>
+<div class="grain"></div>
+
+<div class="app-container">
+    <header class="header">
+        <button class="back-btn" onclick="navigateTo('pink-dashboard.html')" aria-label="Go back">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="header-title">Security Center</div>
+    </header>
+
+    <section class="security-hero">
+        <div class="security-shield">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <h1 class="security-hero-title">Bank-grade security</h1>
+        <p class="security-hero-desc">Your funds and data are protected to the same standards used by banks across Africa.</p>
+        <div class="security-badge-row">
+            <span class="security-badge">256-bit SSL</span>
+            <span class="security-badge">PCI DSS</span>
+            <span class="security-badge">AES-256</span>
+        </div>
+    </section>
+
+    <div class="status-bar">
+        <div class="status-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="status-text">
+            <div class="status-title">All systems secure</div>
+            <div class="status-desc">Last security scan: just now</div>
+        </div>
+        <div class="status-check">Protected</div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Security features</div>
+        <div class="feature-card">
+            <div class="feature-icon green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <div class="feature-content">
+                <div class="feature-title">256-bit encryption</div>
+                <div class="feature-desc">All data sent between your device and our servers uses AES-256 encryption — the same standard relied on by banks and military systems worldwide.</div>
+            </div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon pink">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2.5"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            </div>
+            <div class="feature-content">
+                <div class="feature-title">PCI DSS compliant</div>
+                <div class="feature-desc">We follow the Payment Card Industry Data Security Standard, so your card and payment details are handled under strict, audited controls.</div>
+            </div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon cyan">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+            <div class="feature-content">
+                <div class="feature-title">Real-time fraud monitoring</div>
+                <div class="feature-desc">Every transaction is screened automatically, 24/7, to catch suspicious activity before it can affect your account.</div>
+            </div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon gold">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <div class="feature-content">
+                <div class="feature-title">Secure data centers</div>
+                <div class="feature-desc">Your data lives in ISO 27001–certified facilities with redundant backups, biometric access control, and round-the-clock physical security.</div>
+            </div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="feature-content">
+                <div class="feature-title">Identity verification</div>
+                <div class="feature-desc">Multi-layer checks — KYC, device fingerprinting, and behavioral signals — help ensure only you can access your account.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="partner-card">
+        <div class="partner-eyebrow">Payments infrastructure</div>
+        <div class="partner-wordmark" aria-label="Interswitch">
+            <span class="inter">inter</span><span class="switch">switch</span><span class="dot">•</span>
+        </div>
+        <p class="partner-desc">Card payments are processed by Interswitch, one of Africa's longest-running and most widely licensed digital payment networks.</p>
+        <div class="partner-badges">
+            <span class="partner-badge">CBN Licensed</span>
+            <span class="partner-badge">PSHC License</span>
+            <span class="partner-badge">EMV Certified</span>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Certifications & standards</div>
+        <div class="cert-grid">
+            <div class="cert-card">
+                <div class="cert-icon green">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
+                <div class="cert-title">ISO 27001</div>
+                <div class="cert-desc">Information security management</div>
+            </div>
+            <div class="cert-card">
+                <div class="cert-icon pink">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <div class="cert-title">PCI DSS Level 1</div>
+                <div class="cert-desc">Payment card industry standard</div>
+            </div>
+            <div class="cert-card">
+                <div class="cert-icon cyan">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+                </div>
+                <div class="cert-title">SOC 2 Type II</div>
+                <div class="cert-desc">Service organization controls</div>
+            </div>
+            <div class="cert-card">
+                <div class="cert-icon gold">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                </div>
+                <div class="cert-title">GDPR ready</div>
+                <div class="cert-desc">Data protection compliance</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Your protection</div>
+        <div class="feature-card">
+            <div class="feature-icon green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+            <div class="feature-content">
+                <div class="feature-title">Zero liability</div>
+                <div class="feature-desc">You're never held responsible for unauthorized transactions. Verified fraud is reimbursed in full.</div>
+            </div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon pink">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <div class="feature-content">
+                <div class="feature-title">24/7 support</div>
+                <div class="feature-desc">Our security team is available around the clock for any concerns or suspicious activity on your account.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-note">
+        <div class="footer-note-text">
+            Pink App is committed to maintaining the highest security standards.<br>
+            Questions? Contact our security team at <a href="mailto:security@pinkapp.africa">security@pinkapp.africa</a>
+        </div>
+    </div>
+</div>
+
+<div class="spinner-overlay" id="spinnerOverlay">
+    <div class="spinner-ring"></div>
+    <div style="color:var(--text-secondary);font-size:0.85rem;font-weight:500;letter-spacing:0.5px;">Loading...</div>
+</div>
+
+<script>
+function navigateTo(url) {
+    document.getElementById('spinnerOverlay').classList.add('active');
+    setTimeout(function() { window.location.href = url; }, 600);
+}
+</script>
+</body>
+</html>
