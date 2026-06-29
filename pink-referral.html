@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Referrals - Pink App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink: #fe2c55;
+    --pink-glow: rgba(254, 44, 85, 0.4);
+    --cyan: #25f4ee;
+    --cyan-glow: rgba(37, 244, 238, 0.3);
+    --gold: #ffd700;
+    --gold-glow: rgba(255, 215, 0, 0.3);
+    --bg: #0a0a0f;
+    --card-bg: rgba(255, 255, 255, 0.03);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --card-highlight: rgba(255, 255, 255, 0.05);
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.6);
+    --text-muted: rgba(255, 255, 255, 0.35);
+    --success: #00d084;
+    --error: #ff4757;
+    --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+    line-height: 1.4;
+  }
+
+  .app-container {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 12px 14px 24px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(70px);
+    pointer-events: none;
+    z-index: 0;
+    animation: float 20s ease-in-out infinite;
+  }
+  .orb-1 {
+    width: 260px; height: 260px;
+    background: radial-gradient(circle, var(--pink-glow), transparent 70%);
+    top: -80px; left: -80px;
+  }
+  .orb-2 {
+    width: 220px; height: 220px;
+    background: radial-gradient(circle, var(--cyan-glow), transparent 70%);
+    bottom: 80px; right: -60px;
+    animation-delay: -7s;
+    animation-duration: 25s;
+  }
+  .orb-3 {
+    width: 180px; height: 180px;
+    background: radial-gradient(circle, var(--gold-glow), transparent 70%);
+    top: 35%; left: 50%;
+    transform: translateX(-50%);
+    animation-delay: -14s;
+    animation-duration: 22s;
+  }
+  @keyframes float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(25px, -25px) scale(1.08); }
+    66% { transform: translate(-15px, 15px) scale(0.95); }
+  }
+
+  .grain {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 200px 200px;
+  }
+
+  .glass-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 10px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.25s var(--spring), box-shadow 0.3s ease;
+  }
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.08), transparent 50%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+  .glass-card:active { transform: scale(0.97); }
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    padding-top: 4px;
+  }
+  .back-btn {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .back-btn:active { transform: scale(0.92); background: var(--card-highlight); }
+  .header-title h1 {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    text-align: center;
+  }
+  .header-title p {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-align: center;
+    margin-top: 1px;
+  }
+  .header-profile {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .header-profile img {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--pink);
+    box-shadow: 0 0 10px var(--pink-glow);
+  }
+  .header-profile span {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    max-width: 70px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .referral-code-card {
+    text-align: center;
+    padding: 18px 14px;
+    background: linear-gradient(135deg, rgba(254,44,85,0.08), rgba(37,244,238,0.04));
+  }
+  .referral-code-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--pink);
+    margin-bottom: 8px;
+  }
+  .referral-code-display {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    color: var(--text-primary);
+    text-shadow: 0 0 24px var(--pink-glow);
+    margin-bottom: 14px;
+    font-family: 'Inter', monospace;
+    word-break: break-all;
+    min-height: 36px;
+  }
+  .referral-code-display.shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+    border-radius: 4px;
+    width: 140px;
+    margin: 0 auto 14px;
+    color: transparent;
+  }
+  .referral-code-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+  .btn-copy, .btn-share {
+    flex: 1;
+    max-width: 120px;
+    height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--card-border);
+    background: var(--card-highlight);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: all 0.2s var(--spring);
+    backdrop-filter: blur(10px);
+  }
+  .btn-copy { border-color: rgba(254,44,85,0.3); }
+  .btn-share { border-color: rgba(37,244,238,0.3); }
+  .btn-copy:active, .btn-share:active { transform: scale(0.95); }
+  .btn-copy:hover { background: rgba(254,44,85,0.15); box-shadow: 0 0 16px var(--pink-glow); }
+  .btn-share:hover { background: rgba(37,244,238,0.15); box-shadow: 0 0 16px var(--cyan-glow); }
+
+  .link-card {
+    text-align: center;
+    padding: 14px;
+  }
+  .link-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--cyan);
+    margin-bottom: 8px;
+  }
+  .link-display {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    word-break: break-all;
+    line-height: 1.5;
+    font-family: 'Inter', monospace;
+    min-height: 40px;
+  }
+  .link-display.shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+    color: transparent;
+  }
+  .link-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+  .btn-copy-link, .btn-share-link {
+    flex: 1;
+    max-width: 120px;
+    height: 36px;
+    border-radius: 10px;
+    border: 1px solid var(--card-border);
+    background: var(--card-highlight);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: all 0.2s var(--spring);
+    backdrop-filter: blur(10px);
+  }
+  .btn-copy-link { border-color: rgba(37,244,238,0.3); }
+  .btn-share-link { border-color: rgba(255,215,0,0.3); }
+  .btn-copy-link:active, .btn-share-link:active { transform: scale(0.95); }
+  .btn-copy-link:hover { background: rgba(37,244,238,0.15); box-shadow: 0 0 16px var(--cyan-glow); }
+  .btn-share-link:hover { background: rgba(255,215,0,0.15); box-shadow: 0 0 16px var(--gold-glow); }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .stat-card {
+    text-align: center;
+    padding: 10px 4px;
+  }
+  .stat-icon {
+    width: 22px;
+    height: 22px;
+    margin: 0 auto 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+  }
+  .stat-icon svg {
+    width: 100%;
+    height: 100%;
+    stroke-width: 2;
+  }
+  .stat-value {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+  }
+  .stat-label {
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .enter-code-card h3 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .enter-code-card > p {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+  }
+  .input-group {
+    display: flex;
+    gap: 8px;
+  }
+  .input-group input {
+    flex: 1;
+    height: 42px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 0 12px;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    outline: none;
+    transition: all 0.2s ease;
+  }
+  .input-group input:focus {
+    border-color: var(--pink);
+    box-shadow: 0 0 0 3px rgba(254,44,85,0.12);
+  }
+  .input-group input::placeholder {
+    color: var(--text-muted);
+    text-transform: none;
+    font-weight: 400;
+    letter-spacing: 0;
+    font-size: 13px;
+  }
+  .btn-apply {
+    height: 42px;
+    padding: 0 18px;
+    background: linear-gradient(135deg, var(--pink), #ff6b81);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s var(--spring);
+    white-space: nowrap;
+    box-shadow: 0 3px 14px rgba(254,44,85,0.25);
+  }
+  .btn-apply:active { transform: scale(0.95); }
+  .btn-apply:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  .referral-status {
+    margin-top: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    min-height: 18px;
+  }
+  .referral-status.pending { color: var(--gold); }
+  .referral-status.success { color: var(--success); }
+  .referral-status.error { color: var(--error); }
+
+  .how-it-works {
+    margin-bottom: 10px;
+  }
+  .how-it-works h3 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    padding-left: 2px;
+  }
+  .steps {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    position: relative;
+  }
+  .step {
+    flex: 1;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+  }
+  .step-number {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--pink), var(--cyan));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    margin: 0 auto 6px;
+    box-shadow: 0 0 10px rgba(254,44,85,0.25);
+    color: white;
+  }
+  .step-icon {
+    font-size: 22px;
+    margin-bottom: 4px;
+    line-height: 1;
+  }
+  .step-title {
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .step-desc {
+    font-size: 9px;
+    color: var(--text-muted);
+    line-height: 1.3;
+    padding: 0 2px;
+  }
+  .step-connector {
+    flex: 0.4;
+    height: 1.5px;
+    background: linear-gradient(90deg, var(--pink), var(--cyan));
+    opacity: 0.25;
+    margin-top: 10px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .history-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .history-header h3 {
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .history-count {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--pink);
+    background: rgba(254,44,85,0.15);
+    padding: 3px 8px;
+    border-radius: 20px;
+  }
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .history-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.04);
+    transition: all 0.2s ease;
+  }
+  .history-item:active { background: rgba(255,255,255,0.05); }
+  .history-avatar {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--pink), var(--gold));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+    color: white;
+  }
+  .history-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .history-name {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .history-meta {
+    font-size: 11px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .history-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .history-dot.pending { background: var(--gold); box-shadow: 0 0 6px var(--gold); }
+  .history-dot.success { background: var(--success); box-shadow: 0 0 6px var(--success); }
+  .history-reward {
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .history-reward-amount {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--success);
+  }
+  .history-reward-coins {
+    font-size: 10px;
+    color: var(--gold);
+    font-weight: 600;
+  }
+  .history-empty {
+    text-align: center;
+    padding: 20px 16px;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+
+  .auto-submit-banner {
+    display: none;
+    background: linear-gradient(135deg, rgba(254,44,85,0.15), rgba(37,244,238,0.08));
+    border: 1px solid rgba(254,44,85,0.25);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    align-items: center;
+    gap: 10px;
+    animation: bannerIn 0.5s var(--spring) forwards;
+  }
+  .auto-submit-banner.active { display: flex; }
+  .auto-submit-banner .banner-icon {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: rgba(254,44,85,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .auto-submit-banner .banner-text {
+    flex: 1;
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+  .auto-submit-banner .banner-text strong {
+    color: var(--text-primary);
+    display: block;
+    margin-bottom: 2px;
+  }
+  @keyframes bannerIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .spinner-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .spinner-overlay.active {
+    display: flex;
+    opacity: 1;
+  }
+  .spinner-container {
+    position: relative;
+    width: 70px;
+    height: 70px;
+  }
+  .spinner-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2.5px solid transparent;
+  }
+  .spinner-ring-1 {
+    border-top-color: var(--pink);
+    border-right-color: var(--cyan);
+    border-bottom-color: var(--gold);
+    animation: spin 1s linear infinite;
+  }
+  .spinner-ring-2 {
+    inset: 7px;
+    border-left-color: var(--gold);
+    border-bottom-color: var(--pink);
+    animation: spin 1.5s linear infinite reverse;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  .spinner-text {
+    margin-top: 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: 1px;
+  }
+
+  .toast-container {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+    width: 90%;
+    max-width: 380px;
+  }
+  .toast {
+    background: rgba(18, 18, 26, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    animation: toastIn 0.4s var(--spring) forwards;
+    pointer-events: auto;
+  }
+  .toast.toast-success { border-color: rgba(0, 208, 132, 0.3); color: var(--success); }
+  .toast.toast-error { border-color: rgba(255, 71, 87, 0.3); color: var(--error); }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateY(-16px) scale(0.92); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes toastOut {
+    to { opacity: 0; transform: translateY(-8px) scale(0.95); }
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  @media (max-width: 360px) {
+    .app-container { padding: 10px 12px 20px; }
+    .stats-row { gap: 6px; }
+    .stat-card { padding: 8px 2px; }
+    .referral-code-display { font-size: 24px; letter-spacing: 2px; }
+    .step-icon { font-size: 20px; }
+    .step-title { font-size: 10px; }
+    .step-desc { font-size: 8px; }
+    .history-avatar { width: 30px; height: 30px; font-size: 12px; }
+    .history-name { font-size: 12px; }
+    .history-reward-amount { font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="grain"></div>
+
+  <div class="spinner-overlay" id="spinnerOverlay">
+    <div class="spinner-container">
+      <div class="spinner-ring spinner-ring-1"></div>
+      <div class="spinner-ring spinner-ring-2"></div>
+    </div>
+    <p class="spinner-text">Loading...</p>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <div class="app-container">
+    <header class="page-header">
+      <button class="back-btn" onclick="navigateTo('pink-dashboard.html')" aria-label="Back">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      </button>
+      <div class="header-title">
+        <h1>Refer & Earn</h1>
+        <p>Invite friends, earn rewards</p>
+      </div>
+      <div class="header-profile">
+        <img id="headerPhoto" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='12' fill='%23fe2c55'/%3E%3Ctext x='12' y='16' text-anchor='middle' fill='white' font-size='12' font-weight='bold'%3EU%3C/text%3E%3C/svg%3E" alt="Profile">
+        <span id="headerNickname">User</span>
+      </div>
+    </header>
+
+    <div class="auto-submit-banner" id="autoSubmitBanner">
+      <div class="banner-icon">🎁</div>
+      <div class="banner-text">
+        <strong>Referral Bonus Detected</strong>
+        You signed up with a referral code. Tap "Apply" below to claim your exclusive bonus!
+      </div>
+    </div>
+
+    <section class="glass-card referral-code-card">
+      <div class="referral-code-label">Your Referral Code</div>
+      <div class="referral-code-display shimmer" id="referralCodeDisplay">----</div>
+      <div class="referral-code-actions">
+        <button class="btn-copy" id="btnCopy" onclick="copyReferralCode()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy
+        </button>
+        <button class="btn-share" id="btnShare" onclick="shareReferralCode()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          Share
+        </button>
+      </div>
+    </section>
+
+    <section class="glass-card link-card">
+      <div class="link-label">Your Referral Link</div>
+      <div class="link-display shimmer" id="referralLinkDisplay">Generating link...</div>
+      <div class="link-actions">
+        <button class="btn-copy-link" id="btnCopyLink" onclick="copyReferralLink()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy Link
+        </button>
+        <button class="btn-share-link" id="btnShareLink" onclick="shareReferralLink()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          Share Link
+        </button>
+      </div>
+    </section>
+
+    <section class="stats-row">
+      <div class="glass-card stat-card">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="stat-value" id="statTotal">0</div>
+        <div class="stat-label">Referrals</div>
+      </div>
+      <div class="glass-card stat-card">
+        <div class="stat-icon">🪙</div>
+        <div class="stat-value" id="statCoins">0</div>
+        <div class="stat-label">Coins</div>
+      </div>
+      <div class="glass-card stat-card">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 3v18"/>
+            <path d="M17 3v18"/>
+            <path d="M7 3l10 18"/>
+            <line x1="4" y1="9" x2="20" y2="9"/>
+            <line x1="4" y1="15" x2="20" y2="15"/>
+          </svg>
+        </div>
+        <div class="stat-value" id="statCash">₦0</div>
+        <div class="stat-label">Earned</div>
+      </div>
+    </section>
+
+    <section class="glass-card enter-code-card">
+      <h3>Have a Referral Code?</h3>
+      <p>Enter a friend's code to get your exclusive bonus</p>
+      <div class="input-group">
+        <input type="text" id="referralInput" placeholder="Enter code (e.g. TIMMY123)" maxlength="20" autocomplete="off">
+        <button class="btn-apply" id="btnApply" onclick="submitReferralCode()">Apply</button>
+      </div>
+      <div class="referral-status" id="referralStatus"></div>
+    </section>
+
+    <section class="how-it-works">
+      <h3>How It Works</h3>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-icon">📤</div>
+          <div class="step-title">Share Code</div>
+          <div class="step-desc">Share your code with friends</div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-icon">📝</div>
+          <div class="step-title">Friend Joins</div>
+          <div class="step-desc">They sign up using your code</div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-icon">🎁</div>
+          <div class="step-title">Exclusive Bonus</div>
+          <div class="step-desc" id="rewardDesc">They get an exclusive bonus</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="glass-card history-card">
+      <div class="history-header">
+        <h3>Referral History</h3>
+        <span class="history-count" id="historyCount">0</span>
+      </div>
+      <div class="history-list" id="historyList">
+        <div class="history-empty">No referrals yet. Start sharing your code!</div>
+      </div>
+    </section>
+  </div>
+
+<script>
+/* ============================================================
+   SHARED EARNINGS SYNC — SAME AS SURVEY PAGE
+   ============================================================ */
+var COUNTRY_CONFIG = {
+    'NG':{'name':'Nigeria','currency':'NGN','symbol':'₦','rate':50,'flag':'🇳🇬'},
+    'GH':{'name':'Ghana','currency':'GHS','symbol':'GH₵','rate':0.75,'flag':'🇬🇭'},
+    'KE':{'name':'Kenya','currency':'KES','symbol':'KSh','rate':38.50,'flag':'🇰🇪'},
+    'ZA':{'name':'South Africa','currency':'ZAR','symbol':'R','rate':1.12,'flag':'🇿🇦'},
+    'UG':{'name':'Uganda','currency':'UGX','symbol':'USh','rate':182.50,'flag':'🇺🇬'},
+    'TZ':{'name':'Tanzania','currency':'TZS','symbol':'TSh','rate':119.50,'flag':'🇹🇿'},
+    'RW':{'name':'Rwanda','currency':'RWF','symbol':'RF','rate':96.50,'flag':'🇷🇼'},
+    'ET':{'name':'Ethiopia','currency':'ETB','symbol':'Br','rate':2.78,'flag':'🇪🇹'},
+    'EG':{'name':'Egypt','currency':'EGP','symbol':'E£','rate':2.35,'flag':'🇪🇬'},
+    'MA':{'name':'Morocco','currency':'MAD','symbol':'DH','rate':3.12,'flag':'🇲🇦'},
+    'SN':{'name':'Senegal','currency':'XOF','symbol':'CFA','rate':328.50,'flag':'🇸🇳'},
+    'CI':{'name':"Côte d'Ivoire",'currency':'XOF','symbol':'CFA','rate':328.50,'flag':'🇨🇮'},
+    'CM':{'name':'Cameroon','currency':'XAF','symbol':'CFA','rate':328.50,'flag':'🇨🇲'},
+    'ZM':{'name':'Zambia','currency':'ZMW','symbol':'K','rate':2.18,'flag':'🇿🇲'},
+    'ZW':{'name':'Zimbabwe','currency':'ZWL','symbol':'Z$','rate':18.50,'flag':'🇿🇼'},
+    'MW':{'name':'Malawi','currency':'MWK','symbol':'MK','rate':130.50,'flag':'🇲🇼'},
+    'AO':{'name':'Angola','currency':'AOA','symbol':'Kz','rate':111.50,'flag':'🇦🇴'},
+    'CD':{'name':'DR Congo','currency':'CDF','symbol':'FC','rate':274.50,'flag':'🇨🇩'},
+    'BJ':{'name':'Benin','currency':'XOF','symbol':'CFA','rate':328.50,'flag':'🇧🇯'},
+    'TG':{'name':'Togo','currency':'XOF','symbol':'CFA','rate':328.50,'flag':'🇹🇬'},
+    'ML':{'name':'Mali','currency':'XOF','symbol':'CFA','rate':328.50,'flag':'🇲🇱'},
+    'MU':{'name':'Mauritius','currency':'MUR','symbol':'₨','rate':4.52,'flag':'🇲🇺'},
+    'LR':{'name':'Liberia','currency':'LRD','symbol':'L$','rate':13.50,'flag':'🇱🇷'}
+};
+
+var userCountry = localStorage.getItem('pinkApp_country') || 'NG';
+
+function fmtCoins(n) {
+    return new Intl.NumberFormat('en-US').format((n == null || isNaN(n)) ? 0 : n);
+}
+
+function generateRef() {
+    return 'TXN-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2,5).toUpperCase();
+}
+
+function getTimeAgo(date) {
+    if (!date) return 'Just now';
+    var secs = Math.floor((Date.now() - new Date(date)) / 1000);
+    if (secs < 60) return 'Just now';
+    var m = Math.floor(secs/60); if (m < 60) return m + 'm ago';
+    var h = Math.floor(m/60);   if (h < 24) return h + 'h ago';
+    var d = Math.floor(h/24);   if (d < 7)  return d + 'd ago';
+    return new Date(date).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}
+
+/* ===== LOG EARNINGS TO DASHBOARD & HISTORY ===== */
+function logEarning(type, amount, description) {
+    var activity = {
+        ref: generateRef(),
+        type: 'referral',
+        amount: parseFloat(amount) || 0,
+        status: 'completed',
+        time: new Date().toISOString(),
+        balanceAfter: Math.floor(parseFloat(localStorage.getItem('pinkApp_coins')) || 0),
+        description: description || ''
+    };
+
+    // Save to localStorage (history page reads this)
+    var activities = [];
+    try {
+        activities = JSON.parse(localStorage.getItem('pinkApp_activities') || '[]');
+    } catch(e) { activities = []; }
+    activities.unshift(activity);
+    if (activities.length > 200) activities = activities.slice(0, 200);
+    localStorage.setItem('pinkApp_activities', JSON.stringify(activities));
+
+    // Save to Firestore (dashboard syncs this)
+    if (window.pinkAppLogActivityToFirestore && typeof window.pinkAppLogActivityToFirestore === 'function') {
+        window.pinkAppLogActivityToFirestore(activity);
+    }
+}
+
+/* ===== UNIFIED EARNINGS PERSIST (same keys as survey page) ===== */
+function persistEarnings(coins, today, week, xp, videos) {
+    var cfg = COUNTRY_CONFIG[userCountry] || COUNTRY_CONFIG['NG'];
+    var balance = (coins || 0) * (cfg ? cfg.rate : 50);
+    localStorage.setItem('pinkApp_coins',     coins || 0);
+    localStorage.setItem('pinkApp_balance',   balance || 0);
+    localStorage.setItem('pinkApp_today',     today || 0);
+    localStorage.setItem('pinkApp_week',      week || 0);
+    localStorage.setItem('pinkApp_videos',    videos || 0);
+    localStorage.setItem('pinkApp_xp',        xp || 0);
+}
+
+/* ===== LOG ACTIVITY TO SHARED FEED (for history page) ===== */
+function logActivity(type, amount, ref, status) {
+    var acts = JSON.parse(localStorage.getItem('pinkApp_activities') || '[]');
+    var currentCoins = parseInt(localStorage.getItem('pinkApp_coins')) || 0;
+    var act = {
+        type: type,
+        amount: amount,
+        ref: ref,
+        status: status,
+        time: new Date().toISOString(),
+        balanceAfter: currentCoins
+    };
+    acts.unshift(act);
+    localStorage.setItem('pinkApp_activities', JSON.stringify(acts.slice(0,100)));
+    if (window.pinkAppLogActivityToFirestore && typeof window.pinkAppLogActivityToFirestore === 'function') {
+        window.pinkAppLogActivityToFirestore(act);
+    }
+}
+
+/* ===== SYNC EARNINGS TO FIRESTORE ===== */
+function syncEarningsToFirestore(data) {
+    if (window.pinkAppSyncEarningsToFirestore && typeof window.pinkAppSyncEarningsToFirestore === 'function') {
+        window.pinkAppSyncEarningsToFirestore(data);
+    }
+}
+
+/* ===== CREDIT REFERRAL REWARD ===== */
+function creditReferralReward(coinReward, cashReward) {
+    var currentCoins  = parseInt(localStorage.getItem('pinkApp_coins')) || 0;
+    var currentToday  = parseFloat(localStorage.getItem('pinkApp_today')) || 0;
+    var currentWeek   = parseFloat(localStorage.getItem('pinkApp_week')) || 0;
+    var currentXP     = parseInt(localStorage.getItem('pinkApp_xp')) || 0;
+    var currentVideos = parseInt(localStorage.getItem('pinkApp_videos')) || 0;
+
+    var newCoins  = currentCoins + (coinReward || 0);
+    var newToday  = currentToday + (coinReward || 0);
+    var newWeek   = currentWeek + (coinReward || 0);
+    var newXP     = currentXP + Math.floor((coinReward || 0) / 2);
+    var newVideos = currentVideos + 1;
+
+    // Persist to shared localStorage keys
+    persistEarnings(newCoins, newToday, newWeek, newXP, newVideos);
+
+    // Log to activity feed (THIS IS THE KEY ADDITION)
+    logEarning('referral', coinReward, 'Referral bonus earned');
+
+    // Sync to Firestore
+    syncEarningsToFirestore({
+        userCoins: newCoins,
+        todayEarnings: newToday,
+        weekEarnings: newWeek,
+        userXP: newXP,
+        videoCount: newVideos
+    });
+}
+
+window.navigateTo = function(url) {
+    document.getElementById('spinnerOverlay').classList.add('active');
+    setTimeout(function() { window.location.href = url; }, 600);
+};
+
+window.showToast = function(message, isSuccess) {
+    var container = document.getElementById('toastContainer');
+    var toast = document.createElement('div');
+    toast.className = 'toast ' + (isSuccess ? 'toast-success' : 'toast-error');
+    var iconSvg = isSuccess
+        ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'
+        : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+    toast.innerHTML = iconSvg + '<span>' + message + '</span>';
+    container.appendChild(toast);
+    setTimeout(function() {
+        toast.style.animation = 'toastOut 0.3s ease forwards';
+        setTimeout(function() { toast.remove(); }, 300);
+    }, 3000);
+};
+</script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, reload } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, collection, query, where, getDocs, addDoc, serverTimestamp, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBUEKYA5x1T2Qb3T8Z6rP5qv5jmfTXlRU0",
+    authDomain: "pink-app-5ecd1.firebaseapp.com",
+    projectId: "pink-app-5ecd1"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const COUNTRY_CONFIG = {
+    nigeria: { currency: '₦', locale: 'en-NG', rate: 1, name: 'Nigeria' },
+    ghana: { currency: 'GH₵', locale: 'en-GH', rate: 0.006, name: 'Ghana' },
+    kenya: { currency: 'KSh', locale: 'en-KE', rate: 0.09, name: 'Kenya' },
+    southAfrica: { currency: 'R', locale: 'en-ZA', rate: 0.012, name: 'South Africa' },
+    uganda: { currency: 'USh', locale: 'en-UG', rate: 2.4, name: 'Uganda' },
+    tanzania: { currency: 'TSh', locale: 'en-TZ', rate: 5.5, name: 'Tanzania' },
+    rwanda: { currency: 'RF', locale: 'en-RW', rate: 0.75, name: 'Rwanda' },
+    ethiopia: { currency: 'Br', locale: 'en-ET', rate: 0.055, name: 'Ethiopia' },
+    default: { currency: '$', locale: 'en-US', rate: 0.00065, name: 'Global' }
+  };
+
+  let currentUser = null;
+  let ownReferralCode = '';
+  let referralSettings = { coinReward: 120, cashReward: 200 };
+  let unsubUser = null;
+
+  function formatCurrency(amountInNaira) {
+    const country = localStorage.getItem('pinkApp_country') || 'nigeria';
+    const config = COUNTRY_CONFIG[country] || COUNTRY_CONFIG.nigeria;
+    const converted = amountInNaira * config.rate;
+    return `${config.currency}${converted.toLocaleString(config.locale, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+  }
+
+  function getShareText(includeLink) {
+    const code = ownReferralCode || '----';
+    const coins = referralSettings?.coinReward || 120;
+    const cash = referralSettings?.cashReward || 200;
+    const baseUrl = window.location.origin;
+    const link = `${baseUrl}/pink-signup.html?ref=${encodeURIComponent(code)}`;
+    return `🎉 Get an exclusive bonus on Pink App!\n\nSign up using my referral link and claim your exclusive bonus immediately:\n${link}\n\nReferral Code: ${code}\n\nDon't miss out — start earning today! 💰`;
+  }
+
+  function loadLocalUserData() {
+    const nickname = localStorage.getItem('pinkApp_nickname') || 'User';
+    const photoURL = localStorage.getItem('pinkApp_photoURL');
+    document.getElementById('headerNickname').textContent = nickname;
+    if (photoURL) {
+      document.getElementById('headerPhoto').src = photoURL;
+    }
+  }
+
+  async function loadReferralSettings() {
+    try {
+      const snap = await getDoc(doc(db, "config", "referralSettings"));
+      if (snap.exists()) {
+        referralSettings = { ...referralSettings, ...snap.data() };
+      }
+    } catch (e) {
+      console.log("Using default referral settings");
+    }
+    document.getElementById('rewardDesc').textContent = 'They get an exclusive bonus';
+  }
+
+  async function loadOwnReferralCode(uid) {
+    try {
+      const userDoc = await getDoc(doc(db, "users", uid));
+      if (userDoc.exists() && userDoc.data().referralCode) {
+        ownReferralCode = userDoc.data().referralCode;
+        localStorage.setItem('pinkApp_refCode', ownReferralCode);
+      } else {
+        ownReferralCode = localStorage.getItem('pinkApp_refCode') || generateFallbackCode(uid);
+      }
+    } catch (e) {
+      ownReferralCode = localStorage.getItem('pinkApp_refCode') || generateFallbackCode(uid);
+    }
+    const display = document.getElementById('referralCodeDisplay');
+    display.textContent = ownReferralCode;
+    display.classList.remove('shimmer');
+
+    const baseUrl = window.location.origin;
+    const referralLink = `${baseUrl}/pink-signup.html?ref=${encodeURIComponent(ownReferralCode)}`;
+    const linkDisplay = document.getElementById('referralLinkDisplay');
+    linkDisplay.textContent = referralLink;
+    linkDisplay.classList.remove('shimmer');
+  }
+
+  function generateFallbackCode(uid) {
+    return uid ? uid.substring(0, 8).toUpperCase() : 'PINK' + Math.random().toString(36).substring(2, 6).toUpperCase();
+  }
+
+  async function loadStats(uid) {
+    try {
+      const userSnap = await getDoc(doc(db, "users", uid));
+      if (userSnap.exists()) {
+        const d = userSnap.data();
+        const total = parseInt(d.totalReferrals) || 0;
+        const coins = parseInt(d.referralEarnings) || 0;
+        const cash = coins * 50; // 50 NGN per coin
+        document.getElementById('statTotal').textContent = total;
+        document.getElementById('statCoins').textContent = coins.toLocaleString();
+        document.getElementById('statCash').textContent = formatCurrency(cash);
+      }
+    } catch (e) {
+      console.error("Stats error:", e);
+    }
+  }
+
+  async function loadHistory(uid) {
+    const list = document.getElementById('historyList');
+    try {
+      // Read from activities subcollection where type == 'referral'
+      const q = query(
+        collection(db, "users", uid, "activities"),
+        where("type", "==", "referral")
+      );
+      const snap = await getDocs(q);
+      const items = [];
+      snap.forEach(doc => {
+        const d = doc.data();
+        items.push({ id: doc.id, ...d });
+      });
+
+      items.sort((a, b) => {
+        const aTime = a.time ? new Date(a.time).getTime() : 0;
+        const bTime = b.time ? new Date(b.time).getTime() : 0;
+        return bTime - aTime;
+      });
+
+      document.getElementById('historyCount').textContent = items.length;
+
+      if (items.length === 0) {
+        list.innerHTML = '<div class="history-empty">No referrals yet. Start sharing your code!</div>';
+        return;
+      }
+
+      list.innerHTML = items.map(item => {
+        const name = item.description || 'Referral Bonus';
+        const initial = (name && name.charAt(0).toUpperCase()) || 'R';
+        const date = item.time ? new Date(item.time).toLocaleDateString() : 'Recently';
+        const rewardCoins = item.amount || 120;
+        const rewardCash = rewardCoins * 50;
+        return `
+          <div class="history-item">
+            <div class="history-avatar">${initial}</div>
+            <div class="history-info">
+              <div class="history-name">${name}</div>
+              <div class="history-meta">
+                <span class="history-dot success"></span>
+                <span>Success · ${date}</span>
+              </div>
+            </div>
+            <div class="history-reward">
+              <div class="history-reward-amount">${formatCurrency(rewardCash)}</div>
+              <div class="history-reward-coins">+${rewardCoins} coins</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    } catch (e) {
+      console.error("History error:", e);
+    }
+  }
+
+  async function checkAndAutoSubmitPendingRef() {
+    const pendingRef = localStorage.getItem('pinkApp_pendingRef');
+    if (!pendingRef || !currentUser) return;
+
+    try {
+      const pendingQ = query(collection(db, "pendingReferrals"), where("newUserId", "==", currentUser.uid));
+      const pendingSnap = await getDocs(pendingQ);
+      if (!pendingSnap.empty) {
+        localStorage.removeItem('pinkApp_pendingRef');
+        return;
+      }
+
+      const approvedQ = query(collection(db, "referrals"), where("referredId", "==", currentUser.uid));
+      const approvedSnap = await getDocs(approvedQ);
+      if (!approvedSnap.empty) {
+        localStorage.removeItem('pinkApp_pendingRef');
+        return;
+      }
+
+      document.getElementById('autoSubmitBanner').classList.add('active');
+      document.getElementById('referralInput').value = pendingRef;
+
+    } catch (e) {
+      console.error("Auto-check error:", e);
+    }
+  }
+
+  window.copyReferralCode = async function() {
+    if (!ownReferralCode) return;
+    const text = getShareText(false);
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast('Referral message copied!', true);
+    } catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast('Referral message copied!', true);
+    }
+  };
+
+  window.shareReferralCode = async function() {
+    if (!ownReferralCode) return;
+    const text = getShareText(false);
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'Join Pink App', text: text, url: window.location.origin });
+      } else {
+        await navigator.clipboard.writeText(text);
+        showToast('Referral message copied to clipboard!', true);
+      }
+    } catch (e) {
+      if (e.name !== 'AbortError') showToast('Failed to share', false);
+    }
+  };
+
+  window.copyReferralLink = async function() {
+    const text = getShareText(true);
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast('Referral link & message copied!', true);
+    } catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast('Referral link & message copied!', true);
+    }
+  };
+
+  window.shareReferralLink = async function() {
+    const text = getShareText(true);
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'Join Pink App', text: text, url: window.location.origin });
+      } else {
+        await navigator.clipboard.writeText(text);
+        showToast('Referral message copied to clipboard!', true);
+      }
+    } catch (e) {
+      if (e.name !== 'AbortError') showToast('Failed to share link', false);
+    }
+  };
+
+  window.submitReferralCode = async function() {
+    const input = document.getElementById('referralInput');
+    const btn = document.getElementById('btnApply');
+    const status = document.getElementById('referralStatus');
+    const code = input.value.trim().toUpperCase();
+
+    if (!code) {
+      status.textContent = 'Please enter a referral code';
+      status.className = 'referral-status error';
+      showToast('Enter a referral code', false);
+      return;
+    }
+
+    if (!currentUser) {
+      status.textContent = 'Please log in first';
+      status.className = 'referral-status error';
+      showToast('Authentication required', false);
+      return;
+    }
+
+    try { await reload(currentUser); } catch (e) {}
+    if (!currentUser.emailVerified) {
+      status.textContent = 'Verify your email first';
+      status.className = 'referral-status error';
+      showToast('Please verify your email before using a referral code', false);
+      return;
+    }
+
+    try {
+      const userRef = doc(db, "users", currentUser.uid);
+      const userSnap = await getDoc(userRef);
+      if (!userSnap.exists()) {
+        status.textContent = 'Complete your account setup';
+        status.className = 'referral-status error';
+        showToast('Please complete your account registration first', false);
+        return;
+      }
+    } catch (e) {
+      status.textContent = 'Account verification failed';
+      status.className = 'referral-status error';
+      showToast('Unable to verify account status. Try again.', false);
+      return;
+    }
+
+    if (code === ownReferralCode) {
+      status.textContent = 'You cannot use your own code';
+      status.className = 'referral-status error';
+      showToast('Cannot self-refer', false);
+      return;
+    }
+
+    btn.disabled = true;
+    status.textContent = 'Checking...';
+    status.className = 'referral-status pending';
+
+    try {
+      const pendingQ = query(collection(db, "pendingReferrals"), where("newUserId", "==", currentUser.uid));
+      const pendingSnap = await getDocs(pendingQ);
+      if (!pendingSnap.empty) {
+        const existing = pendingSnap.docs[0].data();
+        if (existing.status === 'pending') {
+          status.textContent = 'Your referral is pending admin approval';
+          status.className = 'referral-status pending';
+          showToast('Referral already pending approval', true);
+          btn.disabled = false;
+          localStorage.removeItem('pinkApp_pendingRef');
+          return;
+        }
+      }
+
+      const approvedQ = query(collection(db, "referrals"), where("referredId", "==", currentUser.uid));
+      const approvedSnap = await getDocs(approvedQ);
+      if (!approvedSnap.empty) {
+        status.textContent = 'You have already used a referral code';
+        status.className = 'referral-status success';
+        showToast('You already used a referral code', true);
+        btn.disabled = false;
+        localStorage.removeItem('pinkApp_pendingRef');
+        return;
+      }
+
+      const userQ = query(collection(db, "users"), where("referralCode", "==", code));
+      const userSnap = await getDocs(userQ);
+
+      if (userSnap.empty) {
+        status.textContent = 'Invalid referral code';
+        status.className = 'referral-status error';
+        showToast('Invalid referral code', false);
+        btn.disabled = false;
+        return;
+      }
+
+      const referrerDoc = userSnap.docs[0];
+      const referrerId = referrerDoc.id;
+      const referrerData = referrerDoc.data();
+
+      if (referrerId === currentUser.uid) {
+        status.textContent = 'You cannot use your own code';
+        status.className = 'referral-status error';
+        showToast('Cannot self-refer', false);
+        btn.disabled = false;
+        return;
+      }
+
+      await addDoc(collection(db, "pendingReferrals"), {
+        newUserId: currentUser.uid,
+        userEmail: currentUser.email || '',
+        userName: localStorage.getItem('pinkApp_nickname') || currentUser.displayName || 'User',
+        referralCode: code,
+        referrerId: referrerId,
+        referrerName: referrerData.nickname || referrerData.displayName || 'User',
+        status: 'pending',
+        createdAt: serverTimestamp()
+      });
+
+      status.textContent = 'Pending admin approval';
+      status.className = 'referral-status pending';
+      showToast('Referral submitted! Pending approval.', true);
+      input.value = '';
+      localStorage.removeItem('pinkApp_pendingRef');
+      document.getElementById('autoSubmitBanner').classList.remove('active');
+
+    } catch (e) {
+      console.error("Submit error:", e);
+      status.textContent = 'Error: ' + (e.message || 'Failed to submit');
+      status.className = 'referral-status error';
+      showToast('Failed to submit referral', false);
+    } finally {
+      btn.disabled = false;
+    }
+  };
+
+  /* ===== REAL-TIME USER SYNC (same pattern as survey page) ===== */
+  function setupUserSync(uid) {
+    if (unsubUser) unsubUser();
+    unsubUser = onSnapshot(doc(db, 'users', uid), (snap) => {
+      if (!snap.exists()) return;
+      const d = snap.data();
+      if (d.country) {
+        localStorage.setItem('pinkApp_country', d.country);
+        window.userCountry = d.country;
+      }
+      if (d.nickname) localStorage.setItem('pinkApp_nickname', d.nickname);
+    });
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      currentUser = user;
+      localStorage.setItem('pinkApp_lastUid', user.uid);
+      loadLocalUserData();
+      setupUserSync(user.uid);
+      await loadReferralSettings();
+      await loadOwnReferralCode(user.uid);
+      await loadStats(user.uid);
+      await loadHistory(user.uid);
+      await checkAndAutoSubmitPendingRef();
+    } else {
+      loadLocalUserData();
+      const savedCode = localStorage.getItem('pinkApp_refCode');
+      if (savedCode) {
+        ownReferralCode = savedCode;
+        document.getElementById('referralCodeDisplay').textContent = savedCode;
+        document.getElementById('referralCodeDisplay').classList.remove('shimmer');
+        const baseUrl = window.location.origin;
+        document.getElementById('referralLinkDisplay').textContent = `${baseUrl}/pink-signup.html?ref=${encodeURIComponent(savedCode)}`;
+        document.getElementById('referralLinkDisplay').classList.remove('shimmer');
+      }
+    }
+  });
+
+  document.getElementById('referralInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') submitReferralCode();
+  });
+
+  loadLocalUserData();
+  const savedCode = localStorage.getItem('pinkApp_refCode');
+  if (savedCode) {
+    ownReferralCode = savedCode;
+    document.getElementById('referralCodeDisplay').textContent = savedCode;
+    document.getElementById('referralCodeDisplay').classList.remove('shimmer');
+    const baseUrl = window.location.origin;
+    document.getElementById('referralLinkDisplay').textContent = `${baseUrl}/pink-signup.html?ref=${encodeURIComponent(savedCode)}`;
+    document.getElementById('referralLinkDisplay').classList.remove('shimmer');
+  }
+
+  /* ===== FIRESTORE SYNC HELPERS (same as survey page) ===== */
+  window.pinkAppSyncEarningsToFirestore = async function(data) {
+    if (!auth.currentUser) return;
+    try {
+      const cfg = window.COUNTRY_CONFIG && window.COUNTRY_CONFIG[window.userCountry || 'NG'];
+      const computedBalance = (data.userCoins || 0) * (cfg ? cfg.rate : 50);
+      await setDoc(doc(db, 'users', auth.currentUser.uid), {
+        todayEarnings: data.todayEarnings,
+        weekEarnings: data.weekEarnings,
+        videoCount: data.videoCount,
+        userXP: data.userXP,
+        coins: data.userCoins,
+        balance: computedBalance,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    } catch(e) { console.error('Referral earnings sync failed', e); }
+  };
+
+  window.pinkAppLogActivityToFirestore = async function(activityData) {
+    if (!auth.currentUser) return;
+    try {
+      await addDoc(collection(db, 'users', auth.currentUser.uid, 'activities'), activityData);
+    } catch(e) { console.error('Referral activity write failed', e); }
+  };
+</script>
+</body>
+</html>
